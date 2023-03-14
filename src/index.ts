@@ -1,13 +1,9 @@
 import { MikroORM, RequestContext } from '@mikro-orm/core';
-import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import express from 'express';
+import config from './mikro-orm.config';
 
 async function main() {
-  const orm = await MikroORM.init<PostgreSqlDriver>({
-    entities: ['./dist/entities'], // path to your JS entities (dist), relative to `baseDir`
-    dbName: 'libra',
-    type: 'postgresql',
-  });
+  const orm = await MikroORM.init(config);
 
   const app = express();
   // You should register this middleware as the last one just before request handlers
@@ -27,4 +23,6 @@ async function main() {
   });
 }
 
-main();
+main().catch((err) => {
+  console.log(err);
+});
