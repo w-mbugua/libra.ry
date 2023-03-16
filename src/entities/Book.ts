@@ -1,14 +1,20 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { Field, ObjectType } from "type-graphql";
 import { Author } from "./Author";
 
+@ObjectType()
 @Entity()
 export class Book {
+	@Field()
 	@PrimaryKey()
-	id: string;
-
+	id: number;
+	
+	@Field(() => String)
 	@Property()
 	title!: string;
 	
-	@ManyToOne('Author')
+	@Field(() => Author)
+	@ManyToOne(() => Author)
 	author!: Author
 }
+
