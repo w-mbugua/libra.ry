@@ -11,7 +11,25 @@ type Author {
 type Book {
   author: Author!
   id: Float!
+  loans: [Loan!]!
+  reservations: [Reservation!]!
+  tags: [Tag!]!
   title: String!
+}
+
+"""
+The javascript `Date` as string. Type represents date and time as the ISO Date string.
+"""
+scalar DateTime
+
+type Loan {
+  book: Book!
+  borrower: User!
+  createdAt: DateTime!
+  id: Float!
+  name: String!
+  returnDate: DateTime!
+  updatedAt: DateTime!
 }
 
 type Mutation {
@@ -26,6 +44,7 @@ input NewAuthorInput {
 
 input NewBookInput {
   author: String!
+  tag: String!
   title: String!
 }
 
@@ -39,6 +58,21 @@ input NewUserInput {
 type Query {
   getAuthors: [Author!]!
   getBooks: [Book!]!
+}
+
+type Reservation {
+  book: Book!
+  createdAt: DateTime!
+  id: Float!
+  reserver: User!
+  status: String!
+  updatedAt: DateTime!
+}
+
+type Tag {
+  books: [Book!]!
+  id: Float!
+  name: String!
 }
 
 type User {

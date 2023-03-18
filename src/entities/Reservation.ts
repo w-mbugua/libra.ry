@@ -1,11 +1,4 @@
-import {
-  Entity,
-  Enum,
-  ManyToOne,
-  OneToMany,
-  PrimaryKey,
-  Property,
-} from '@mikro-orm/core';
+import { Entity, Enum, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import { Field, ObjectType } from 'type-graphql';
 import { Book } from './Book';
 import { User } from './User';
@@ -25,7 +18,7 @@ export class Reservation {
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
-  @Field()
+  @Field(() => Book)
   @ManyToOne(() => Book)
   book!: Book;
 
@@ -38,7 +31,7 @@ export class Reservation {
   status!: ReservationStatus;
 }
 
-export const enum ReservationStatus {
+export enum ReservationStatus {
   PENDING = 'pendng',
   FULFILLED = 'fulfilled',
   CANCELLED = 'cancelled',

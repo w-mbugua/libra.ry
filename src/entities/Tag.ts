@@ -1,7 +1,8 @@
 import { Collection, Entity, ManyToMany, PrimaryKey, Property } from '@mikro-orm/core';
-import { Field } from 'type-graphql';
+import { Field, ObjectType } from 'type-graphql';
 import { Book } from './Book';
 
+@ObjectType()
 @Entity()
 export class Tag {
   @Field()

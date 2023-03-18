@@ -10,7 +10,7 @@ import {
   Resolver,
 } from 'type-graphql';
 import { Author } from '../entities/Author';
-import { Tag } from 'src/entities/Tag';
+import { Tag } from '../entities/Tag';
 
 @InputType()
 class NewBookInput {

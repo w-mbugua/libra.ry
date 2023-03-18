@@ -25,7 +25,7 @@ export class Book {
   title!: string;
 
   @Field(() => [Tag])
-  @ManyToMany(() => Tag)
+  @ManyToMany({ entity: 'Tag', fixedOrder: true })
   tags = new Collection<Tag>(this);
 
   @Field(() => Author)
