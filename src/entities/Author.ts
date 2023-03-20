@@ -19,6 +19,7 @@ export class Author {
   @Property({ hidden: true })
   name!: string;
 
+  @Field(() => [Book])
   @OneToMany(() => Book, (book: Book) => book.author)
   books = new Collection<Book>(this);
 }

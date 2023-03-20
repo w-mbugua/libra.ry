@@ -11,10 +11,6 @@ export class Loan {
   id: number;
 
   @Field()
-  @Property({ hidden: true })
-  name!: string;
-
-  @Field()
   @Property()
   createdAt: Date = new Date();
 

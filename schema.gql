@@ -4,6 +4,7 @@
 # -----------------------------------------------
 
 type Author {
+  books: [Book!]!
   id: Float!
   name: String!
 }
@@ -12,6 +13,7 @@ type Book {
   author: Author!
   id: Float!
   loans: [Loan!]!
+  owner: User!
   reservations: [Reservation!]!
   tags: [Tag!]!
   title: String!
@@ -27,19 +29,14 @@ type Loan {
   borrower: User!
   createdAt: DateTime!
   id: Float!
-  name: String!
   returnDate: DateTime!
   updatedAt: DateTime!
 }
 
 type Mutation {
-  addAuthor(newAuthorData: NewAuthorInput!): Author!
+  addAuthor(name: String!): Author!
   addBook(newBookData: NewBookInput!): Book!
   addUser(newUserData: NewUserInput!): User!
-}
-
-input NewAuthorInput {
-  name: String!
 }
 
 input NewBookInput {
@@ -52,12 +49,14 @@ input NewUserInput {
   email: String!
   firstName: String!
   lastName: String!
-  phonNumber: String!
+  password: String!
+  phoneNumber: String!
 }
 
 type Query {
   getAuthors: [Author!]!
   getBooks: [Book!]!
+  getTags: [Author!]!
 }
 
 type Reservation {
@@ -76,7 +75,10 @@ type Tag {
 }
 
 type User {
+  books: [Book!]!
+  email: String!
   firstName: String!
   id: Float!
   lastName: String!
+  phoneNumber: String!
 }

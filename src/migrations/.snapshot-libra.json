@@ -176,15 +176,6 @@
     },
     {
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "unsigned": true,
-          "autoincrement": true,
-          "primary": true,
-          "nullable": false,
-          "mappedType": "integer"
-        },
         "book_id": {
           "name": "book_id",
           "type": "int",
@@ -210,9 +201,10 @@
         {
           "keyName": "book_tags_pkey",
           "columnNames": [
-            "id"
+            "book_id",
+            "tag_id"
           ],
-          "composite": false,
+          "composite": true,
           "primary": true,
           "unique": true
         }
@@ -408,15 +400,6 @@
           "primary": true,
           "nullable": false,
           "mappedType": "integer"
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "string"
         },
         "created_at": {
           "name": "created_at",

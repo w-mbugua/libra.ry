@@ -13,6 +13,7 @@ import { BookResolver } from './resolvers/Book';
 import { AuthorResolver } from './resolvers/Author';
 import { MyContext } from './types';
 import { json } from 'body-parser';
+import { TagResolver } from './resolvers/Tag';
 
 async function main() {
   const orm = await MikroORM.init(config);
@@ -34,7 +35,7 @@ async function main() {
 
   const server = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver, BookResolver, AuthorResolver],
+      resolvers: [UserResolver, BookResolver, AuthorResolver, TagResolver],
       emitSchemaFile: true,
       validate: false,
     }),
