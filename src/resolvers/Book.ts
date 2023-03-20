@@ -35,8 +35,11 @@ export class BookResolver {
     // create author
     const newAuthor = em.create(Author, { name: author });
     const newBook = em.create(Book, { title, author: newAuthor });
+    newAuthor.books.add(newBook);
     if (newBookData.tag) {
       const newTag = em.create(Tag, { name: newBookData.tag });
+      newBook.tags.add(newTag);
+      newTag.books.add(newBook);
       await em.persistAndFlush(newTag);
     }
     await em.persistAndFlush(newAuthor);
@@ -47,8 +50,6 @@ export class BookResolver {
   @Query(() => [Book])
   async getBooks(@Ctx() { em }: MyContext): Promise<Book[]> {
     const allBooks = await em.find(Book, {}, { populate: true });
-    console.log('ALL BOOKS', allBooks);
-
     return allBooks;
   }
 }

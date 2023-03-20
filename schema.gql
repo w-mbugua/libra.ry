@@ -4,6 +4,7 @@
 # -----------------------------------------------
 
 type Author {
+  books: [Book!]!
   id: Float!
   name: String!
 }
@@ -27,19 +28,14 @@ type Loan {
   borrower: User!
   createdAt: DateTime!
   id: Float!
-  name: String!
   returnDate: DateTime!
   updatedAt: DateTime!
 }
 
 type Mutation {
-  addAuthor(newAuthorData: NewAuthorInput!): Author!
+  addAuthor(name: String!): Author!
   addBook(newBookData: NewBookInput!): Book!
   addUser(newUserData: NewUserInput!): User!
-}
-
-input NewAuthorInput {
-  name: String!
 }
 
 input NewBookInput {
@@ -58,6 +54,7 @@ input NewUserInput {
 type Query {
   getAuthors: [Author!]!
   getBooks: [Book!]!
+  getTags: [Author!]!
 }
 
 type Reservation {

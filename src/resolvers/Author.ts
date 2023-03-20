@@ -1,6 +1,14 @@
 import { Author } from '../entities/Author';
 import { MyContext } from 'src/types';
-import { Arg, Ctx, Field, InputType, Mutation, Query, Resolver } from 'type-graphql';
+import {
+  Arg,
+  Ctx,
+  Field,
+  InputType,
+  Mutation,
+  Query,
+  Resolver,
+} from 'type-graphql';
 
 @InputType()
 class NewAuthorInput {
@@ -21,7 +29,7 @@ export class AuthorResolver {
 
   @Query(() => [Author])
   async getAuthors(@Ctx() { em }: MyContext): Promise<Author[]> {
-    const allAuthors = await em.find(Author, {});
-	return allAuthors
+    const allAuthors = await em.find(Author, {}, { populate: true });
+    return allAuthors;
   }
 }

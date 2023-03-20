@@ -25,7 +25,7 @@ export class Book {
   title!: string;
 
   @Field(() => [Tag])
-  @ManyToMany({ entity: 'Tag', fixedOrder: true })
+  @ManyToMany({ entity: () => Tag, inversedBy: 'books' })
   tags = new Collection<Tag>(this);
 
   @Field(() => Author)
@@ -34,9 +34,9 @@ export class Book {
 
   @Field(() => [Reservation])
   @OneToMany(() => Reservation, (r: Reservation) => r.book)
-  reservations = new Collection<Reservation>(this)
+  reservations = new Collection<Reservation>(this);
 
   @Field(() => [Loan])
   @OneToMany(() => Loan, (loan: Loan) => loan.book)
-  loans = new Collection<Loan>(this)
+  loans = new Collection<Loan>(this);
 }
