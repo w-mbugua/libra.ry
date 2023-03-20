@@ -14,7 +14,10 @@ class NewUserInput {
   email!: string;
 
   @Field(() => String)
-  phonNumber!: string;
+  phoneNumber!: string;
+
+  @Field(() => String)
+  password!: string;
 }
 
 @Resolver()
