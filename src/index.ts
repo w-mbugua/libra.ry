@@ -75,13 +75,14 @@ async function main() {
 
   app.use(
     '/graphql',
-    cors<cors.CorsRequest>(),
+    cors<cors.CorsRequest>(corsOptions),
     json(),
     expressMiddleware(server, {
       context: async ({ req, res }): Promise<MyContext> => ({
         req,
         res,
         em: orm.em.fork(),
+        redis: redisClient
       }),
     })
   );
