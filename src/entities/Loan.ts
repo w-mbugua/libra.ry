@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import { Field, ObjectType } from 'type-graphql';
 import { Book } from './Book';
-import { User } from './User';
+import { Member } from './Member';
 
 @ObjectType()
 @Entity()
@@ -26,7 +26,7 @@ export class Loan {
   @ManyToOne(() => Book)
   book!: Book;
 
-  @Field(() => User)
-  @ManyToOne(() => User)
-  borrower!: User;
+  @Field(() => Member)
+  @ManyToOne(() => Member)
+  borrower!: Member;
 }

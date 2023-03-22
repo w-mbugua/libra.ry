@@ -13,7 +13,7 @@ type Book {
   author: Author!
   id: Float!
   loans: [Loan!]!
-  owner: User!
+  owner: Member!
   reservations: [Reservation!]!
   tags: [Tag!]!
   title: String!
@@ -24,19 +24,44 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 """
 scalar DateTime
 
+type FieldError {
+  field: String!
+  message: String!
+}
+
 type Loan {
   book: Book!
-  borrower: User!
+  borrower: Member!
   createdAt: DateTime!
   id: Float!
   returnDate: DateTime!
   updatedAt: DateTime!
 }
 
+input LoginInput {
+  email: String
+  password: String!
+  username: String
+}
+
+type Member {
+  books: [Book!]!
+  email: String!
+  id: Float!
+  phoneNumber: String!
+  username: String!
+}
+
+type MemberResponse {
+  error: [FieldError!]
+  member: Member
+}
+
 type Mutation {
   addAuthor(name: String!): Author!
   addBook(newBookData: NewBookInput!): Book!
-  addUser(newUserData: NewUserInput!): User!
+  login(loginInput: LoginInput!): MemberResponse!
+  register(newMemberData: NewMemberInput!): MemberResponse!
 }
 
 input NewBookInput {
@@ -45,12 +70,11 @@ input NewBookInput {
   title: String!
 }
 
-input NewUserInput {
+input NewMemberInput {
   email: String!
-  firstName: String!
-  lastName: String!
   password: String!
   phoneNumber: String!
+  username: String!
 }
 
 type Query {
@@ -63,7 +87,7 @@ type Reservation {
   book: Book!
   createdAt: DateTime!
   id: Float!
-  reserver: User!
+  reserver: Member!
   status: String!
   updatedAt: DateTime!
 }
@@ -72,13 +96,4 @@ type Tag {
   books: [Book!]!
   id: Float!
   name: String!
-}
-
-type User {
-  books: [Book!]!
-  email: String!
-  firstName: String!
-  id: Float!
-  lastName: String!
-  phoneNumber: String!
 }
