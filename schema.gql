@@ -60,6 +60,8 @@ type MemberResponse {
 type Mutation {
   addAuthor(name: String!): Author!
   addBook(newBookData: NewBookInput!): Book!
+  changePassword(newPassword: String!, token: String!): Member!
+  forgotPassword(email: String!): Boolean!
   login(loginInput: LoginInput!): MemberResponse!
   register(newMemberData: NewMemberInput!): MemberResponse!
 }
@@ -78,6 +80,7 @@ input NewMemberInput {
 }
 
 type Query {
+  currentUser: Member!
   getAuthors: [Author!]!
   getBooks: [Book!]!
   getTags: [Author!]!
