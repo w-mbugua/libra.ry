@@ -80,6 +80,7 @@ input NewMemberInput {
 }
 
 type Query {
+  currentUser: Member!
   getAuthors: [Author!]!
   getBooks: [Book!]!
   getTags: [Author!]!

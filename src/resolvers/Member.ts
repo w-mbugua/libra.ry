@@ -6,7 +6,9 @@ import {
   InputType,
   Mutation,
   ObjectType,
+  Query,
   Resolver,
+  UseMiddleware,
 } from 'type-graphql';
 import { Member } from '../entities/Member';
 import { MyContext } from '../types';
@@ -14,6 +16,7 @@ import { validateLogin, validateRegister } from '../validators/member';
 import { v4 } from 'uuid';
 import { FORGET_PASSWORD_PREFIX } from '../constants';
 import sendMail from '../utils/sendMail';
+import { isAuth } from '../middleware/isAuth';
 
 @InputType()
 export class NewMemberInput {
@@ -62,6 +65,13 @@ class MemberResponse {
 
 @Resolver()
 export class MemberResolver {
+  @Query(() => Member)
+  @UseMiddleware(isAuth)
+  async currentUser(@Ctx() ctx: MyContext) {
+    const user = await ctx.em.findOne(Member, { id: ctx.req.session.userId });
+    return user;
+  }
+
   @Mutation(() => MemberResponse)
   async register(
     @Arg('newMemberData') newMemberData: NewMemberInput,
@@ -127,7 +137,10 @@ export class MemberResolver {
       'EX',
       1000 * 60 * 60 * 24 * 3
     );
-    await sendMail(email, `<a href="http://localhost:3000/change-password/${token}">reset password</a>`);
+    await sendMail(
+      email,
+      `<a href="http://localhost:3000/change-password/${token}">reset password</a>`
+    );
     return true;
   }
 
