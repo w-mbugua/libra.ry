@@ -1,7 +1,7 @@
 import { Entity, Enum, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import { Field, ObjectType } from 'type-graphql';
 import { Book } from './Book';
-import { User } from './User';
+import { Member } from './Member';
 
 @ObjectType()
 @Entity()
@@ -22,9 +22,9 @@ export class Reservation {
   @ManyToOne(() => Book)
   book!: Book;
 
-  @Field(() => User)
-  @ManyToOne(() => User)
-  reserver!: User;
+  @Field(() => Member)
+  @ManyToOne(() => Member)
+  reserver!: Member;
 
   @Field()
   @Enum(() => ReservationStatus)

@@ -12,7 +12,7 @@ import { Author } from './Author';
 import { Loan } from './Loan';
 import { Reservation } from './Reservation';
 import { Tag } from './Tag';
-import { User } from './User';
+import { Member } from './Member';
 
 @ObjectType()
 @Entity()
@@ -33,9 +33,9 @@ export class Book {
   @ManyToOne(() => Author)
   author!: Author;
 
-  @Field(() => User)
-  @ManyToOne(() => User)
-  owner!: User;
+  @Field(() => Member)
+  @ManyToOne(() => Member)
+  owner!: Member;
 
   @Field(() => [Reservation])
   @OneToMany(() => Reservation, (r: Reservation) => r.book)
