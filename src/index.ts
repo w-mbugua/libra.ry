@@ -8,7 +8,7 @@ import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import cors from 'cors';
 import { buildSchema } from 'type-graphql';
-import { UserResolver } from './resolvers/User';
+import { MemberResolver } from './resolvers/Member';
 import { BookResolver } from './resolvers/Book';
 import { AuthorResolver } from './resolvers/Author';
 import { MyContext } from './types';
@@ -33,7 +33,8 @@ async function main() {
   const redisClient = new Redis(process.env.REDIS_URL as string);
   const corsOptions = {
     credentials: true,
-    origin: process.env.CORS_ORIGIN,
+    origin: 'https://sandbox.embed.apollographql.com'
+    // origin: process.env.CORS_ORIGIN,
   };
 
   const redisStore = new RedisStore({
@@ -66,7 +67,7 @@ async function main() {
 
   const server = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver, BookResolver, AuthorResolver, TagResolver],
+      resolvers: [MemberResolver, BookResolver, AuthorResolver, TagResolver],
       emitSchemaFile: true,
       validate: false,
     }),
@@ -82,7 +83,7 @@ async function main() {
         req,
         res,
         em: orm.em.fork(),
-        redis: redisClient
+        redis: redisClient,
       }),
     })
   );

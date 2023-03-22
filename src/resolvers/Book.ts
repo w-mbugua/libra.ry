@@ -8,9 +8,12 @@ import {
   Mutation,
   Query,
   Resolver,
+  UseMiddleware,
 } from 'type-graphql';
 import { Author } from '../entities/Author';
 import { Tag } from '../entities/Tag';
+import { isAuth } from '../middleware/isAuth';
+import { Member } from '../entities/Member';
 
 @InputType()
 class NewBookInput {
@@ -27,14 +30,20 @@ class NewBookInput {
 @Resolver()
 export class BookResolver {
   @Mutation(() => Book)
+  @UseMiddleware(isAuth)
   async addBook(
     @Arg('newBookData') newBookData: NewBookInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<Book> {
     const { author, title } = newBookData;
     // create author
     const newAuthor = em.create(Author, { name: author });
-    const newBook = em.create(Book, { title, author: newAuthor });
+    const member = await em.findOneOrFail(Member, { id: req.session.userId });
+    const newBook = em.create(Book, {
+      title,
+      author: newAuthor,
+      owner: member,
+    });
     newAuthor.books.add(newBook);
     if (newBookData.tag) {
       const newTag = em.create(Tag, { name: newBookData.tag });
