@@ -1,6 +1,6 @@
 import { Options } from '@mikro-orm/core';
 import path from 'path';
-import { __prod__ } from './constants';
+import { __prod__ } from './utils/constants';
 
 const config: Options = {
   migrations: {

@@ -14,7 +14,7 @@ import { Member } from '../entities/Member';
 import { MyContext } from '../types';
 import { validateLogin, validateRegister } from '../validators/member';
 import { v4 } from 'uuid';
-import { FORGET_PASSWORD_PREFIX } from '../constants';
+import { FORGET_PASSWORD_PREFIX } from '../utils/constants';
 import sendMail from '../utils/sendMail';
 import { isAuth } from '../middleware/isAuth';
 
