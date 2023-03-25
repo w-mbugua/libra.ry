@@ -8,7 +8,10 @@ const config: Options = {
     glob: '!(*.d).{js,ts}',
   },
   entities: ['./dist/entities'],
-  clientUrl: process.env.DATABASE_URL,
+  clientUrl:
+    process.env.NODE_ENV === 'test'
+      ? process.env.TEST_DATABASE_URL
+      : process.env.DATABASE_URL,
   type: 'postgresql',
   debug: !__prod__,
 };
