@@ -1,3 +1,5 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
 import {
   Connection,
   IDatabaseDriver,
@@ -32,6 +34,7 @@ export default class Application {
   public redisClient: Redis;
   public redisStore: connectRedis.RedisStore;
   public corsOptions: any;
+  public port: number = Number(process.env.NODE_ENV) || 4000;
 
   public connect = async (): Promise<void> => {
     try {
@@ -102,14 +105,14 @@ export default class Application {
       })
     );
 
-    const port = process.env.PORT || 4000;
-    this.server = this.app.listen(port, () => {
-      console.log('listenin on port: ', port);
+   
+    this.server = this.app.listen(this.port, () => {
+      console.log('listenin on port: ', this.port);
     });
   };
 
   public ping = (): void => {
-    this.app.get('/ping', (req, res) => {
+    this.app.get('/ping', (_req, res) => {
       res.send('pong');
     });
   };
