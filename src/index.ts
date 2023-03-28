@@ -4,7 +4,7 @@ async function main() {
   const app = new Application();
   app.connect();
   app.init();
-  app.initRedis();
+  app.initRedis('lib:');
   app.ping();
 }
 

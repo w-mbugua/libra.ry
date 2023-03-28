@@ -9,10 +9,10 @@ import {
 import express from 'express';
 import { json } from 'body-parser';
 import { Server } from 'http';
-import { Redis } from 'ioredis';
+import Redis from 'ioredis';
 import config from './mikro-orm.config';
 import connectRedis from 'connect-redis';
-import session from 'express-session';
+import session, { Session, SessionData } from 'express-session';
 import { COOKIE_NAME } from './utils/constants';
 import { GraphQLSchema } from 'graphql';
 import { buildSchema } from 'type-graphql';
@@ -50,27 +50,28 @@ export default class Application {
     }
   };
 
-  public initRedis = (): void => {
+  public initRedis = (prefix: string): void => {
     this.redisClient = new Redis(process.env.REDIS_URL as string);
     this.redisStore = new RedisStore({
       client: this.redisClient,
-      prefix: 'lib:',
+      prefix,
     });
-    this.app.use(
-      session({
-        name: COOKIE_NAME,
-        store: this.redisStore,
-        saveUninitialized: true,
-        secret: process.env.SESSION_SECRET as string,
-        resave: false,
-        cookie: {
-          maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
-          httpOnly: true,
-          sameSite: 'lax',
-          secure: false,
-        },
-      })
-    );
+
+    const sessionMiddleware = session({
+      name: COOKIE_NAME,
+      store: this.redisStore,
+      saveUninitialized: true,
+      secret: process.env.SESSION_SECRET as string,
+      resave: false,
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: false,
+      },
+    });
+
+    this.app.use(sessionMiddleware);
   };
 
   public init = async (): Promise<void> => {
@@ -96,16 +97,22 @@ export default class Application {
       cors<cors.CorsRequest>(this.corsOptions),
       json(),
       expressMiddleware(server, {
-        context: async ({ req, res }): Promise<MyContext> => ({
-          req,
-          res,
-          em: this.orm.em.fork(),
-          redis: this.redisClient,
-        }),
+        context: async ({ req, res }): Promise<MyContext> => {
+          if (!req.session && process.env.NODE_ENV === 'test') {
+            req.session = {
+              userId: 1,
+            } as Session & Partial<SessionData>;
+          }
+          return {
+            req,
+            res,
+            em: this.orm.em.fork(),
+            redis: this.redisClient,
+          };
+        },
       })
     );
 
-   
     this.server = this.app.listen(this.port, () => {
       console.log('listenin on port: ', this.port);
     });
