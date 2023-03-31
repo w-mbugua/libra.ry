@@ -17,7 +17,6 @@ let seeder: ISeedManager;
 describe('Book Entity Functions', () => {
   beforeAll(async () => {
     app = new Application();
-    app.port = 3500;
     await app.connect();
     await app.init();
     app.initRedis('test_lib:');
@@ -29,7 +28,6 @@ describe('Book Entity Functions', () => {
     await generator.dropSchema({ wrap: false });
     await generator.createSchema({ wrap: false });
     await seeder.seed(MemberSeeder);
-    await seeder.seed(BookSeeder);
   });
 
 
@@ -40,6 +38,7 @@ describe('Book Entity Functions', () => {
   });
 
   it('should find all books', async () => {
+    await seeder.seed(BookSeeder);
     const response = await request
       .post('/graphql')
       .send({

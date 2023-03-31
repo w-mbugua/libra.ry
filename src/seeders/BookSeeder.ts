@@ -9,8 +9,6 @@ export class BookSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
     const author = await new AuthorFactory(em).createOne();
     const owner = await em.findOneOrFail(Member, { id: 1 });
-    console.log('AUTHUR', author);
-    console.log({ owner });
 
     await new BookFactory(em)
       .each(async (book) => {

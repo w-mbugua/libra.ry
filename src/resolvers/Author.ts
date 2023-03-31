@@ -1,5 +1,5 @@
 import { Author } from '../entities/Author';
-import { MyContext } from 'src/types';
+import { MyContext } from '../types';
 import {
   Arg,
   Ctx,
@@ -8,7 +8,9 @@ import {
   Mutation,
   Query,
   Resolver,
+  UseMiddleware,
 } from 'type-graphql';
+import { isAuth } from '../middleware/isAuth';
 
 @InputType()
 class NewAuthorInput {
@@ -18,6 +20,7 @@ class NewAuthorInput {
 @Resolver()
 export class AuthorResolver {
   @Mutation(() => Author)
+  @UseMiddleware(isAuth)
   async addAuthor(
     @Arg('newAuthorData') newAuthorData: NewAuthorInput,
     @Ctx() { em }: MyContext
