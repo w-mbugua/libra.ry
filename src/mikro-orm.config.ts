@@ -1,6 +1,6 @@
 import { Options } from '@mikro-orm/core';
 import path from 'path';
-import { __prod__ } from './utils/constants';
+import { __prod__, __test__ } from './utils/constants';
 
 const config: Options = {
   migrations: {
@@ -13,7 +13,7 @@ const config: Options = {
       ? process.env.TEST_DATABASE_URL
       : process.env.DATABASE_URL,
   type: 'postgresql',
-  debug: !__prod__,
+  debug: !__prod__ && !__test__,
 };
 
 export default config;
