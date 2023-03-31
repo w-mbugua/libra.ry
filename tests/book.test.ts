@@ -1,35 +1,25 @@
-import {
-  // EntityManager,
-  // Connection,
-  // IDatabaseDriver,
-  ISeedManager,
-} from '@mikro-orm/core';
-import supertest, { SuperTest, Test } from 'supertest';
+import { ISeedManager } from '@mikro-orm/core';
+import { SuperTest, Test } from 'supertest';
 import Application from '../src/application';
 import { BookSeeder } from '../src/seeders/BookSeeder';
 import { MemberSeeder } from '../src/seeders/MemberSeeder';
+import setup from './setup';
 
 let request: SuperTest<Test>;
 let app: Application;
-// let em: EntityManager<IDatabaseDriver<Connection>>;
 let seeder: ISeedManager;
 
 describe('Book Entity Functions', () => {
   beforeAll(async () => {
-    app = new Application();
-    await app.connect();
-    await app.init();
-    app.initRedis('test_lib:');
-
-    // em = app.orm.em.fork();
-    request = supertest(app.app);
-    const generator = app.orm.getSchemaGenerator();
-    seeder = app.orm.getSeeder();
-    await generator.dropSchema({ wrap: false });
-    await generator.createSchema({ wrap: false });
-    await seeder.seed(MemberSeeder);
+    const {
+      app: application,
+      request: supertest,
+      seeder: ormSeeder,
+    } = await setup();
+    app = application;
+    request = supertest;
+    seeder = ormSeeder;
   });
-
 
   afterAll(async () => {
     // Close connection
@@ -38,6 +28,7 @@ describe('Book Entity Functions', () => {
   });
 
   it('should find all books', async () => {
+    await seeder.seed(MemberSeeder);
     await seeder.seed(BookSeeder);
     const response = await request
       .post('/graphql')
@@ -102,5 +93,4 @@ describe('Book Entity Functions', () => {
       'The Great Fire'
     );
   });
-
 });

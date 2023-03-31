@@ -1,23 +1,17 @@
-import { ISeedManager } from '@mikro-orm/core';
-import supertest, { SuperTest, Test } from 'supertest';
+import { SuperTest, Test } from 'supertest';
 import Application from '../src/application';
 import { AuthorSeeder } from '../src/seeders/AuthorSeeder';
+import setup from './setup';
 
 let request: SuperTest<Test>;
 let app: Application;
-let seeder: ISeedManager;
 
 describe('Author Functions', () => {
   beforeAll(async () => {
-    app = new Application();
-    await app.connect();
-    await app.init();
+    const { app: application, request: supertest, seeder } = await setup();
+    app = application;
+    request = supertest;
 
-    request = supertest(app.app);
-    const generator = app.orm.getSchemaGenerator();
-    seeder = app.orm.getSeeder();
-    await generator.dropSchema({ wrap: false });
-    await generator.createSchema({ wrap: false });
     await seeder.seed(AuthorSeeder);
   });
 
