@@ -8,7 +8,6 @@ import {
 } from '@mikro-orm/core';
 import express from 'express';
 import { json } from 'body-parser';
-import { Server } from 'http';
 import Redis from 'ioredis';
 import config from './mikro-orm.config';
 import connectRedis from 'connect-redis';
@@ -30,7 +29,6 @@ const RedisStore = connectRedis(session);
 export default class Application {
   public orm: MikroORM<IDatabaseDriver<Connection>>;
   public app: express.Application;
-  public server: Server;
   public redisClient: Redis;
   public redisStore: connectRedis.RedisStore;
   public corsOptions: any;
@@ -112,15 +110,5 @@ export default class Application {
         },
       })
     );
-
-    this.server = this.app.listen(this.port, () => {
-      console.log('listenin on port: ', this.port);
-    });
-  };
-
-  public ping = (): void => {
-    this.app.get('/ping', (_req, res) => {
-      res.send('pong');
-    });
-  };
+  }
 }
