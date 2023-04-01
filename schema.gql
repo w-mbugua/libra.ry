@@ -61,9 +61,11 @@ type Mutation {
   addAuthor(name: String!): Author!
   addBook(newBookData: NewBookInput!): Book!
   changePassword(newPassword: String!, token: String!): Member!
+  deleteBook(id: Float!): Int!
   forgotPassword(email: String!): Boolean!
   login(loginInput: LoginInput!): MemberResponse!
   register(newMemberData: NewMemberInput!): MemberResponse!
+  updateBook(newTitle: String, title: String): Book!
 }
 
 input NewBookInput {
@@ -82,6 +84,7 @@ input NewMemberInput {
 type Query {
   currentUser: Member!
   getAuthors: [Author!]!
+  getBookById(id: Float!): Book!
   getBooks: [Book!]!
   getTags: [Author!]!
 }

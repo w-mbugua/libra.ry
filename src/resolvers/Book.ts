@@ -5,6 +5,7 @@ import {
   Ctx,
   Field,
   InputType,
+  Int,
   Mutation,
   Query,
   Resolver,
@@ -56,9 +57,50 @@ export class BookResolver {
     return newBook;
   }
 
+  @Mutation(() => Book)
+  @UseMiddleware(isAuth)
+  async updateBook(
+    @Arg('title', { nullable: true }) title: string,
+    @Arg('newTitle', { nullable: true }) newTitle: string,
+    @Ctx() { em, req }: MyContext
+  ): Promise<Book> {
+    const userId = req.session.userId;
+    const owner = await em.findOneOrFail(Member, { id: userId });
+    const book = await em.findOneOrFail(
+      Book,
+      { title: title, owner },
+      { populate: true }
+    );
+  
+    book.title = newTitle;
+    await em.persistAndFlush(book);
+    return book;
+  }
+
   @Query(() => [Book])
   async getBooks(@Ctx() { em }: MyContext): Promise<Book[]> {
     const allBooks = await em.find(Book, {}, { populate: true });
     return allBooks;
+  }
+
+  @Query(() => Book)
+  async getBookById(
+    @Arg('id') id: number,
+    @Ctx() { em }: MyContext
+  ): Promise<Book | String> {
+    const book = await em.findOneOrFail(Book, { id }, { populate: true });
+    return book;
+  }
+
+  @Mutation(() => Int)
+  @UseMiddleware(isAuth)
+  async deleteBook(
+    @Arg('id') id: number,
+    @Ctx() { em, req }: MyContext
+  ): Promise<number> {
+    const userId = req.session.userId;
+    const owner = await em.findOneOrFail(Member, { id: userId });
+    await em.nativeDelete(Book, { id, owner });
+    return 204;
   }
 }
