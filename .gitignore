@@ -4,3 +4,4 @@ dist/
 .env.*
 dump.rdb
 coverage/
+todo.md

@@ -7,6 +7,7 @@ import {
   InputType,
   Int,
   Mutation,
+  ObjectType,
   Query,
   Resolver,
   UseMiddleware,
@@ -15,6 +16,8 @@ import { Author } from '../entities/Author';
 import { Tag } from '../entities/Tag';
 import { isAuth } from '../middleware/isAuth';
 import { Member } from '../entities/Member';
+import { LOAN_PERIOD } from '../utils/constants';
+import { Loan } from '../entities/Loan';
 
 @InputType()
 class NewBookInput {
@@ -28,6 +31,15 @@ class NewBookInput {
   tag: string;
 }
 
+
+@ObjectType()
+class BookResponse {
+  @Field({ nullable: true})
+  book?: Book
+
+  @Field({ nullable: true})
+  message?: string
+}
 @Resolver()
 export class BookResolver {
   @Mutation(() => Book)
@@ -102,5 +114,41 @@ export class BookResolver {
     const owner = await em.findOneOrFail(Member, { id: userId });
     await em.nativeDelete(Book, { id, owner });
     return 204;
+  }
+
+  @Mutation(() => BookResponse) // a loan is created when a user borrows a book
+  @UseMiddleware(isAuth)
+  async borrow(@Arg('id') id: number, @Ctx() ctx: MyContext): Promise<{book: Book |null, message: string}> {
+    const userId = ctx.req.session.userId;
+    const borrower = await ctx.em.findOneOrFail(Member, { id: userId });
+    const book = await ctx.em.findOneOrFail(Book, { id }, { populate: true });
+    const loans = book.loans;
+    const reserves = book.reservations;
+    await loans.init();
+    await reserves.init();
+    let message = '';
+
+    
+    if (loans.length || reserves.length) {
+      console.log("T H E R E");
+      message = 'this book has been borrowed.would you like to reserve it?';
+    } else {
+      console.log("H E R E");
+      
+      const returnDate = new Date().setDate(new Date().getDate() + LOAN_PERIOD);
+
+      const newLoan = ctx.em.create(Loan, {
+        borrower,
+        book,
+        createdAt: '',
+        updatedAt: '',
+        returnDate: new Date(returnDate),
+      });
+      book.loans.add(newLoan);
+      await ctx.em.persistAndFlush(book);
+      await ctx.em.persistAndFlush(newLoan);
+      message = `The book is now yours for the next ${LOAN_PERIOD} days.Please remember to return it on time!`;
+    }
+    return {message, book};
   }
 }

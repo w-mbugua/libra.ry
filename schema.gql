@@ -19,6 +19,11 @@ type Book {
   title: String!
 }
 
+type BookResponse {
+  book: Book
+  message: String
+}
+
 """
 The javascript `Date` as string. Type represents date and time as the ISO Date string.
 """
@@ -60,6 +65,7 @@ type MemberResponse {
 type Mutation {
   addAuthor(name: String!): Author!
   addBook(newBookData: NewBookInput!): Book!
+  borrow(id: Float!): BookResponse!
   changePassword(newPassword: String!, token: String!): Member!
   deleteBook(id: Float!): Int!
   forgotPassword(email: String!): Boolean!

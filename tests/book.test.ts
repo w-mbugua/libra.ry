@@ -94,7 +94,6 @@ describe('Book Entity Functions', () => {
       }
       `,
     });
-    console.log(response.body);
     expect(response.status).toBe(200);
     expect(response.body.data).not.toBeNull();
     expect(Object.values(response.body.data.addBook)).toContain(
@@ -162,5 +161,26 @@ describe('Book Entity Functions', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.data.deleteBook).toBe(204);
+  });
+
+  it('should create a book loan', async () => {
+    await seeder.seed(BookSeeder);
+    const testBook = await em.findOneOrFail(Book, { id: 1 });
+    const response = await request.post('/graphql').send({
+      query: `
+		mutation {
+      borrow(id: ${testBook.id}) {
+        book {
+          title
+        }
+      }
+    }
+		`,
+    });
+
+    console.log('ERROR:', response.error);
+    console.log(response.body);
+    expect(response.error).toBeNull();
+    expect(response.status).toBe(200);
   });
 });
