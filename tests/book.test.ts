@@ -165,11 +165,11 @@ describe('Book Entity Functions', () => {
 
   it('should create a book loan', async () => {
     await seeder.seed(BookSeeder);
-    const testBook = await em.findOneOrFail(Book, { id: 1 });
+    const testBook = await em.find(Book, {});    
     const response = await request.post('/graphql').send({
       query: `
 		mutation {
-      borrow(id: ${testBook.id}) {
+      borrow(id: ${testBook[0].id}) {
         book {
           title
         }
@@ -178,9 +178,7 @@ describe('Book Entity Functions', () => {
 		`,
     });
 
-    console.log('ERROR:', response.error);
-    console.log(response.body);
-    expect(response.error).toBeNull();
+    expect(response.error).not.toBeTruthy()
     expect(response.status).toBe(200);
   });
 });
