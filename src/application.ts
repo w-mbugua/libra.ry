@@ -39,8 +39,8 @@ export default class Application {
       this.orm = await MikroORM.init(config);
       const migrator = this.orm.getMigrator();
       const pending = await migrator.getPendingMigrations();
-      await migrator.up();
       console.log('PENDING:', pending.length);
+      if(pending.length) await migrator.up();
       await RequestContext.createAsync(this.orm.em, async () => {});
     } catch (err) {
       console.error('DB connection failed');

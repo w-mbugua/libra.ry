@@ -32,7 +32,7 @@ export class Reservation {
 }
 
 export enum ReservationStatus {
-  PENDING = 'pendng',
+  PENDING = 'pending',
   FULFILLED = 'fulfilled',
   CANCELLED = 'cancelled',
 }

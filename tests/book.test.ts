@@ -83,6 +83,7 @@ describe('Book Entity Functions', () => {
         addBook(newBookData: { title: "The Great Fire", author: "Shirley Hazard", tag: "love"}) {
           id
           title
+          status
           tags {
             name
           }
@@ -94,9 +95,9 @@ describe('Book Entity Functions', () => {
       }
       `,
     });
-    console.log(response.body);
     expect(response.status).toBe(200);
     expect(response.body.data).not.toBeNull();
+    expect(response.body.data.addBook.status).toBe('available')
     expect(Object.values(response.body.data.addBook)).toContain(
       'The Great Fire'
     );
@@ -162,5 +163,60 @@ describe('Book Entity Functions', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.data.deleteBook).toBe(204);
+  });
+
+  it('should create a book loan', async () => {
+    await seeder.seed(BookSeeder);
+    const books = await em.find(Book, {});
+    const response = await request.post('/graphql').send({
+      query: `
+		mutation {
+      borrow(id: ${books[0].id}) {
+        book {
+          title
+          status
+        }
+      }
+    }
+		`,
+    });
+
+    expect(response.error).toBeFalsy();
+    expect(response.body.data.borrow.book.status).toBe('borrowed')
+    expect(response.status).toBe(200);
+  });
+
+  it('should reserve a book', async () => {
+    await seeder.seed(BookSeeder);
+    const books = await em.find(Book, {});
+    const response = await request.post('/graphql').send({
+      query: `
+      mutation {
+        reserve(id: ${books[0].id}) { 
+          message
+          book {
+            title
+            loans {
+              borrower {
+                username
+              }
+              returnDate
+            }
+            reservations {
+              createdAt
+              reserver {
+                username
+              }
+            }
+          }
+        }
+      }
+      `,
+    });
+
+    console.log(response.error);
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.reserve.message).toBe('reservation successful!');
   });
 });

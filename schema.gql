@@ -15,8 +15,14 @@ type Book {
   loans: [Loan!]!
   owner: Member!
   reservations: [Reservation!]!
+  status: String
   tags: [Tag!]!
   title: String!
+}
+
+type BookResponse {
+  book: Book
+  message: String
 }
 
 """
@@ -60,11 +66,13 @@ type MemberResponse {
 type Mutation {
   addAuthor(name: String!): Author!
   addBook(newBookData: NewBookInput!): Book!
+  borrow(id: Float!): BookResponse!
   changePassword(newPassword: String!, token: String!): Member!
   deleteBook(id: Float!): Int!
   forgotPassword(email: String!): Boolean!
   login(loginInput: LoginInput!): MemberResponse!
   register(newMemberData: NewMemberInput!): MemberResponse!
+  reserve(id: Float!): BookResponse!
   updateBook(newTitle: String, title: String): Book!
 }
 

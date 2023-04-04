@@ -1,6 +1,7 @@
 import {
   Collection,
   Entity,
+  Enum,
   ManyToMany,
   ManyToOne,
   OneToMany,
@@ -44,4 +45,18 @@ export class Book {
   @Field(() => [Loan])
   @OneToMany(() => Loan, (loan: Loan) => loan.book)
   loans = new Collection<Loan>(this);
+
+  @Field({ nullable: true })
+  @Enum(() => BookStatus)
+  status?: BookStatus;
+}
+
+export enum BookStatus {
+  AVAILABLE = 'available',
+  UNAVAILABLE = 'unavailable',
+  BORROWED = 'borrowed',
+  RESERVED = 'reserved',
+  OVERDUE = 'overdue',
+  LOST = 'lost',
+  // RETURNED = 'returned'
 }
