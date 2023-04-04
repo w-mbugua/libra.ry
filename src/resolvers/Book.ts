@@ -18,6 +18,7 @@ import { isAuth } from '../middleware/isAuth';
 import { Member } from '../entities/Member';
 import { LOAN_PERIOD } from '../utils/constants';
 import { Loan } from '../entities/Loan';
+import { Reservation, ReservationStatus } from '../entities/Reservation';
 
 @InputType()
 class NewBookInput {
@@ -31,14 +32,13 @@ class NewBookInput {
   tag: string;
 }
 
-
 @ObjectType()
 class BookResponse {
-  @Field({ nullable: true})
-  book?: Book
+  @Field({ nullable: true })
+  book?: Book;
 
-  @Field({ nullable: true})
-  message?: string
+  @Field({ nullable: true })
+  message?: string;
 }
 @Resolver()
 export class BookResolver {
@@ -83,7 +83,7 @@ export class BookResolver {
       { title: title, owner },
       { populate: true }
     );
-  
+
     book.title = newTitle;
     await em.persistAndFlush(book);
     return book;
@@ -118,7 +118,10 @@ export class BookResolver {
 
   @Mutation(() => BookResponse) // a loan is created when a user borrows a book
   @UseMiddleware(isAuth)
-  async borrow(@Arg('id') id: number, @Ctx() ctx: MyContext): Promise<{book: Book |null, message: string}> {
+  async borrow(
+    @Arg('id') id: number,
+    @Ctx() ctx: MyContext
+  ): Promise<{ book: Book | null; message: string }> {
     const userId = ctx.req.session.userId;
     const borrower = await ctx.em.findOneOrFail(Member, { id: userId });
     const book = await ctx.em.findOneOrFail(Book, { id }, { populate: true });
@@ -128,13 +131,12 @@ export class BookResolver {
     await reserves.init();
     let message = '';
 
-    
     if (loans.length || reserves.length) {
-      console.log("T H E R E");
+      console.log('T H E R E');
       message = 'this book has been borrowed.would you like to reserve it?';
     } else {
-      console.log("H E R E");
-      
+      console.log('H E R E');
+
       const returnDate = new Date().setDate(new Date().getDate() + LOAN_PERIOD);
 
       const newLoan = ctx.em.create(Loan, {
@@ -149,6 +151,32 @@ export class BookResolver {
       await ctx.em.persistAndFlush(newLoan);
       message = `The book is now yours for the next ${LOAN_PERIOD} days.Please remember to return it on time!`;
     }
-    return {message, book};
+    return { message, book };
+  }
+
+  @Mutation(() => BookResponse) // a loan is created when a user borrows a book
+  @UseMiddleware(isAuth)
+  async reserve(
+    @Arg('id') id: number,
+    @Ctx() { em, req }: MyContext
+  ): Promise<{ book: Book | null; message: string }> {
+    const userId = req.session.userId;
+    const reserver = await em.findOneOrFail(Member, { id: userId });
+    const book = await em.findOneOrFail(Book, { id }, { populate: true });
+    let message = '';
+
+    const reservation = em.create(Reservation, {
+      reserver,
+      book,
+      createdAt: '',
+      updatedAt: '',
+      status: ReservationStatus.PENDING
+    });
+    book.reservations.add(reservation);
+    await em.persistAndFlush(book);
+    await em.persistAndFlush(reservation);
+    message = `reservation successful!`;
+
+    return { message, book };
   }
 }

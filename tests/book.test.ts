@@ -165,11 +165,11 @@ describe('Book Entity Functions', () => {
 
   it('should create a book loan', async () => {
     await seeder.seed(BookSeeder);
-    const testBook = await em.find(Book, {});    
+    const books = await em.find(Book, {});
     const response = await request.post('/graphql').send({
       query: `
 		mutation {
-      borrow(id: ${testBook[0].id}) {
+      borrow(id: ${books[0].id}) {
         book {
           title
         }
@@ -178,7 +178,41 @@ describe('Book Entity Functions', () => {
 		`,
     });
 
-    expect(response.error).not.toBeTruthy()
+    expect(response.error).not.toBeTruthy();
     expect(response.status).toBe(200);
+  });
+
+  it('should reserve a book', async () => {
+    await seeder.seed(BookSeeder);
+    const books = await em.find(Book, {});
+    const response = await request.post('/graphql').send({
+      query: `
+      mutation {
+        reserve(id: ${books[0].id}) { 
+          message
+          book {
+            title
+            loans {
+              borrower {
+                username
+              }
+              returnDate
+            }
+            reservations {
+              createdAt
+              reserver {
+                username
+              }
+            }
+          }
+        }
+      }
+      `,
+    });
+
+    console.log(response.error);
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.reserve.message).toBe('reservation successful!');
   });
 });

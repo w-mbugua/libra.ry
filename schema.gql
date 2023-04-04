@@ -71,6 +71,7 @@ type Mutation {
   forgotPassword(email: String!): Boolean!
   login(loginInput: LoginInput!): MemberResponse!
   register(newMemberData: NewMemberInput!): MemberResponse!
+  reserve(id: Float!): BookResponse!
   updateBook(newTitle: String, title: String): Book!
 }
 
