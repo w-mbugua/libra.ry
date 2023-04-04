@@ -15,6 +15,7 @@ type Book {
   loans: [Loan!]!
   owner: Member!
   reservations: [Reservation!]!
+  status: String
   tags: [Tag!]!
   title: String!
 }

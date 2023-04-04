@@ -142,6 +142,23 @@
           "primary": false,
           "nullable": false,
           "mappedType": "integer"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "enumItems": [
+            "available",
+            "unavailable",
+            "borrowed",
+            "reserved",
+            "overdue",
+            "lost"
+          ],
+          "mappedType": "enum"
         }
       },
       "name": "book",
@@ -343,7 +360,7 @@
           "primary": false,
           "nullable": false,
           "enumItems": [
-            "pendng",
+            "pending",
             "fulfilled",
             "cancelled"
           ],

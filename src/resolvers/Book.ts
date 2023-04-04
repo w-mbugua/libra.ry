@@ -1,4 +1,4 @@
-import { Book } from '../entities/Book';
+import { Book, BookStatus } from '../entities/Book';
 import { MyContext } from '../types';
 import {
   Arg,
@@ -56,6 +56,7 @@ export class BookResolver {
       title,
       author: newAuthor,
       owner: member,
+      status: BookStatus.AVAILABLE
     });
     newAuthor.books.add(newBook);
     if (newBookData.tag) {
@@ -125,20 +126,12 @@ export class BookResolver {
     const userId = ctx.req.session.userId;
     const borrower = await ctx.em.findOneOrFail(Member, { id: userId });
     const book = await ctx.em.findOneOrFail(Book, { id }, { populate: true });
-    const loans = book.loans;
-    const reserves = book.reservations;
-    await loans.init();
-    await reserves.init();
     let message = '';
 
-    if (loans.length || reserves.length) {
-      console.log('T H E R E');
+    if (book.status === 'borrowed') {
       message = 'this book has been borrowed.would you like to reserve it?';
     } else {
-      console.log('H E R E');
-
       const returnDate = new Date().setDate(new Date().getDate() + LOAN_PERIOD);
-
       const newLoan = ctx.em.create(Loan, {
         borrower,
         book,
@@ -147,7 +140,9 @@ export class BookResolver {
         returnDate: new Date(returnDate),
       });
       book.loans.add(newLoan);
+      book.status = BookStatus.BORROWED
       await ctx.em.persistAndFlush(book);
+      
       await ctx.em.persistAndFlush(newLoan);
       message = `The book is now yours for the next ${LOAN_PERIOD} days.Please remember to return it on time!`;
     }

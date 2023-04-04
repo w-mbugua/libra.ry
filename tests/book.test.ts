@@ -83,6 +83,7 @@ describe('Book Entity Functions', () => {
         addBook(newBookData: { title: "The Great Fire", author: "Shirley Hazard", tag: "love"}) {
           id
           title
+          status
           tags {
             name
           }
@@ -96,6 +97,7 @@ describe('Book Entity Functions', () => {
     });
     expect(response.status).toBe(200);
     expect(response.body.data).not.toBeNull();
+    expect(response.body.data.addBook.status).toBe('available')
     expect(Object.values(response.body.data.addBook)).toContain(
       'The Great Fire'
     );
@@ -172,13 +174,15 @@ describe('Book Entity Functions', () => {
       borrow(id: ${books[0].id}) {
         book {
           title
+          status
         }
       }
     }
 		`,
     });
 
-    expect(response.error).not.toBeTruthy();
+    expect(response.error).toBeFalsy();
+    expect(response.body.data.borrow.book.status).toBe('borrowed')
     expect(response.status).toBe(200);
   });
 
