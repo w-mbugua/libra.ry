@@ -100,8 +100,9 @@ export class MemberResolver {
     @Ctx() ctx: MyContext
   ): Promise<MemberResponse> {
     const error = validateLogin(loginInput);
+    
     if (error?.length) return { error };
-    const member = await ctx.em.findOneOrFail(
+    const member = await ctx.em.findOne(
       Member,
       loginInput.username
         ? { username: loginInput.username }
@@ -110,7 +111,7 @@ export class MemberResolver {
     if (!member) {
       return {
         error: [
-          { field: 'username or email', message: 'member could not be found' },
+          { field: 'username or email', message: 'Member not be found. Please check your input' },
         ],
       };
     }

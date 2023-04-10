@@ -21,5 +21,10 @@ export const validateLogin = (options: LoginInput) => {
       { field: 'email or username', message: 'username or email is required' },
     ];
   }
+  if (options.password.length < 6) {
+    return [
+      { field: 'password', message: 'password length must be longer than 5' },
+    ];
+  }
   return;
 };
