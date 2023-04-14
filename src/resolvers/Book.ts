@@ -1,5 +1,5 @@
 import { Book, BookStatus } from '../entities/Book';
-import { MyContext } from '../types';
+import { BookDetails, MyContext } from '../types';
 import {
   Arg,
   Ctx,
@@ -61,7 +61,7 @@ export class BookResolver {
     const newAuthor = em.create(Author, { name: author });
     const member = await em.findOneOrFail(Member, { id: req.session.userId });
     const bookSearch = await searchBooksByTitle(title);
-    const bookDetails = bookSearch.length ? bookSearch[0] : {};
+    const bookDetails: BookDetails = bookSearch[0] || {};
     console.log('BOOK DETAILS', bookDetails);
 
     const newBook = em.create(Book, {
@@ -71,9 +71,9 @@ export class BookResolver {
       status: BookStatus.AVAILABLE,
       createdAt: '',
       updatedAt: '',
-      description: '',
-      subtitle: '',
-      cover: '',
+      description: bookDetails.volumeInfo.description || '',
+      subtitle: bookDetails.volumeInfo.subtitle || '',
+      cover: bookDetails.volumeInfo.imageLinks.thumbnail || '',
     });
     newAuthor.books.add(newBook);
     if (newBookData.tag) {
