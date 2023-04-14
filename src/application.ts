@@ -76,7 +76,7 @@ export default class Application {
     this.app = express();
     this.corsOptions = {
       credentials: true,
-      origin: 'https://sandbox.embed.apollographql.com',
+      origin: ['https://sandbox.embed.apollographql.com', 'http://localhost:3000'],
       // origin: process.env.CORS_ORIGIN,
     };
 
