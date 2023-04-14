@@ -48,11 +48,11 @@ export default class Application {
     }
   };
 
-  public initRedis = (prefix: string): void => {
+  public initRedis = (): void => {
     this.redisClient = new Redis(process.env.REDIS_URL as string);
     this.redisStore = new RedisStore({
       client: this.redisClient,
-      prefix,
+      // prefix,
     });
 
     const sessionMiddleware = session({

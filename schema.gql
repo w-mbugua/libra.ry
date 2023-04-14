@@ -11,13 +11,19 @@ type Author {
 
 type Book {
   author: Author!
+  cover: String!
+  createdAt: DateTime!
+  description: String!
   id: Float!
   loans: [Loan!]!
   owner: Member!
   reservations: [Reservation!]!
   status: String
+  subtitle: String
   tags: [Tag!]!
+  textSnippet: String!
   title: String!
+  updatedAt: DateTime!
 }
 
 type BookResponse {
