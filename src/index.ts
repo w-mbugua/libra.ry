@@ -4,7 +4,7 @@ async function main() {
   const app = new Application();
   app.connect();
   app.init();
-  app.initRedis('lib:');
+  app.initRedis();
 
   app.app.listen(process.env.PORT || 4000, () => {
     console.log('listenin on port: ');

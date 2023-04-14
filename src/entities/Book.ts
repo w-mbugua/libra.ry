@@ -26,6 +26,26 @@ export class Book {
   @Property()
   title!: string;
 
+  @Field(() => String)
+  @Property()
+  description: string;
+
+  @Field(() => String, { nullable: true })
+  @Property({ nullable: true })
+  subtitle?: string;
+
+  @Field(() => String)
+  @Property()
+  cover: string;
+
+  @Field()
+  @Property()
+  createdAt: Date = new Date();
+
+  @Field()
+  @Property({ onUpdate: () => new Date() })
+  updatedAt: Date = new Date();
+
   @Field(() => [Tag])
   @ManyToMany({ entity: () => Tag, inversedBy: 'books' })
   tags = new Collection<Tag>(this);

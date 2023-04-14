@@ -4,12 +4,14 @@ import {
   Arg,
   Ctx,
   Field,
+  FieldResolver,
   InputType,
   Int,
   Mutation,
   ObjectType,
   Query,
   Resolver,
+  Root,
   UseMiddleware,
 } from 'type-graphql';
 import { Author } from '../entities/Author';
@@ -19,6 +21,7 @@ import { Member } from '../entities/Member';
 import { LOAN_PERIOD } from '../utils/constants';
 import { Loan } from '../entities/Loan';
 import { Reservation, ReservationStatus } from '../entities/Reservation';
+import { searchBooksByTitle } from '../utils/getBook';
 
 @InputType()
 class NewBookInput {
@@ -40,8 +43,13 @@ class BookResponse {
   @Field({ nullable: true })
   message?: string;
 }
-@Resolver()
+@Resolver(Book)
 export class BookResolver {
+  @FieldResolver(() => String)
+  textSnippet(@Root() root: Book) {
+    return root.description.slice(0, 100);
+  }
+
   @Mutation(() => Book)
   @UseMiddleware(isAuth)
   async addBook(
@@ -52,11 +60,20 @@ export class BookResolver {
     // create author
     const newAuthor = em.create(Author, { name: author });
     const member = await em.findOneOrFail(Member, { id: req.session.userId });
+    const bookSearch = await searchBooksByTitle(title);
+    const bookDetails = bookSearch.length ? bookSearch[0] : {};
+    console.log('BOOK DETAILS', bookDetails);
+
     const newBook = em.create(Book, {
       title,
       author: newAuthor,
       owner: member,
-      status: BookStatus.AVAILABLE
+      status: BookStatus.AVAILABLE,
+      createdAt: '',
+      updatedAt: '',
+      description: '',
+      subtitle: '',
+      cover: '',
     });
     newAuthor.books.add(newBook);
     if (newBookData.tag) {
@@ -140,9 +157,9 @@ export class BookResolver {
         returnDate: new Date(returnDate),
       });
       book.loans.add(newLoan);
-      book.status = BookStatus.BORROWED
+      book.status = BookStatus.BORROWED;
       await ctx.em.persistAndFlush(book);
-      
+
       await ctx.em.persistAndFlush(newLoan);
       message = `The book is now yours for the next ${LOAN_PERIOD} days.Please remember to return it on time!`;
     }
@@ -165,7 +182,7 @@ export class BookResolver {
       book,
       createdAt: '',
       updatedAt: '',
-      status: ReservationStatus.PENDING
+      status: ReservationStatus.PENDING,
     });
     book.reservations.add(reservation);
     await em.persistAndFlush(book);

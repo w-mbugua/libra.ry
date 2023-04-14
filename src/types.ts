@@ -13,3 +13,25 @@ export type MyContext = {
   em: EntityManager<IDatabaseDriver<Connection>>;
   redis: Redis;
 };
+
+export interface BookDetails {
+  id: string;
+  volumeInfo: {
+    title: string;
+    subtitle: string;
+    authors: string[];
+    description: string;
+    publishedDate: string;
+    publisher: string;
+    pageCount: number;
+    language: string;
+    categories: string[];
+    averageRating: number;
+    ratingsCount: number;
+    imageLinks: {
+      smallThumbnail: string;
+      thumbnail: string;
+    };
+  };
+}
+
