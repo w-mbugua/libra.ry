@@ -22,6 +22,7 @@ type Book {
   subtitle: String
   tags: [Tag!]!
   textSnippet: String!
+  thumbnail: String
   title: String!
   updatedAt: DateTime!
 }

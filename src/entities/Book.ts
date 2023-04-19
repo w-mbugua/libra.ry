@@ -38,6 +38,10 @@ export class Book {
   @Property()
   cover: string;
 
+  @Field(() => String, { nullable: true })
+  @Property({ nullable: true })
+  thumbnail?: string;
+
   @Field()
   @Property()
   createdAt: Date = new Date();
