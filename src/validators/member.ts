@@ -16,9 +16,9 @@ export const validateRegister = (options: NewMemberInput) => {
 };
 
 export const validateLogin = (options: LoginInput) => {
-  if (!options.email && !options.username) {
+  if (!options.email && !options.phoneNumber) {   
     return [
-      { field: 'email or username', message: 'username or email is required' },
+      { field: 'email or phone number', message: 'phone number or email is required' },
     ];
   }
   if (options.password.length < 6) {

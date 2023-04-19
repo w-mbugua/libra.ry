@@ -14,7 +14,7 @@ import { Member } from '../entities/Member';
 import { MyContext } from '../types';
 import { validateLogin, validateRegister } from '../validators/member';
 import { v4 } from 'uuid';
-import { FORGET_PASSWORD_PREFIX } from '../utils/constants';
+import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from '../utils/constants';
 import sendMail from '../utils/sendMail';
 import { isAuth } from '../middleware/isAuth';
 
@@ -36,7 +36,7 @@ export class NewMemberInput {
 @InputType()
 export class LoginInput {
   @Field(() => String, { nullable: true })
-  username?: string;
+  phoneNumber?: string;
 
   @Field(() => String, { nullable: true })
   email?: string;
@@ -104,14 +104,14 @@ export class MemberResolver {
     if (error?.length) return { error };
     const member = await ctx.em.findOne(
       Member,
-      loginInput.username
-        ? { username: loginInput.username }
+      loginInput.phoneNumber
+        ? { phoneNumber: loginInput.phoneNumber }
         : { email: loginInput.email }
     );
     if (!member) {
       return {
         error: [
-          { field: 'username or email', message: 'Member not be found. Please check your input' },
+          { field: 'username or phone number', message: 'Member not be found. Please check your input' },
         ],
       };
     }
@@ -177,5 +177,19 @@ export class MemberResolver {
     user.password = password;
     await ctx.em.persistAndFlush(user);
     return { member: user };
+  }
+
+  @Mutation(() => Boolean)
+  logout(@Ctx() ctx: MyContext) {
+    return new Promise((resolve) =>
+      ctx.req.session.destroy((err) => {
+        ctx.res.clearCookie(COOKIE_NAME);
+        if (err) {
+          console.log('logout err', err);
+          resolve(false);
+        }
+        resolve(true);
+      })
+    );
   }
 }

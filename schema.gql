@@ -53,7 +53,7 @@ type Loan {
 input LoginInput {
   email: String
   password: String!
-  username: String
+  phoneNumber: String
 }
 
 type Member {
@@ -77,6 +77,7 @@ type Mutation {
   deleteBook(id: Float!): Int!
   forgotPassword(email: String!): Boolean!
   login(loginInput: LoginInput!): MemberResponse!
+  logout: Boolean!
   register(newMemberData: NewMemberInput!): MemberResponse!
   reserve(id: Float!): BookResponse!
   updateBook(newTitle: String, title: String): Book!

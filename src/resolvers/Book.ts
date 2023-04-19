@@ -47,7 +47,7 @@ class BookResponse {
 export class BookResolver {
   @FieldResolver(() => String)
   textSnippet(@Root() root: Book) {
-    return root.description.slice(0, 100);
+    return root.description.slice(0, 200);
   }
 
   @Mutation(() => Book)
@@ -61,8 +61,7 @@ export class BookResolver {
     const newAuthor = em.create(Author, { name: author });
     const member = await em.findOneOrFail(Member, { id: req.session.userId });
     const bookSearch = await searchBooksByTitle(title);
-    const bookDetails = bookSearch.length ? bookSearch[0] : {};
-    console.log('BOOK DETAILS', bookDetails);
+    console.log(bookSearch);
 
     const newBook = em.create(Book, {
       title,
@@ -71,9 +70,9 @@ export class BookResolver {
       status: BookStatus.AVAILABLE,
       createdAt: '',
       updatedAt: '',
-      description: '',
-      subtitle: '',
-      cover: '',
+      description: bookSearch.volumeInfo.description,
+      subtitle: bookSearch.volumeInfo.subtitle,
+      cover: bookSearch.volumeInfo.imageLinks.thumbnail,
     });
     newAuthor.books.add(newBook);
     if (newBookData.tag) {
