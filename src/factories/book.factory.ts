@@ -11,6 +11,12 @@ export class BookFactory extends Factory<Book> {
         length: { min: 5, max: 7 },
         strategy: 'closest',
       }),
+      subtitle: faker.lorem.word({
+        length: { min: 5, max: 7 },
+        strategy: 'closest',
+      }),
+      description: faker.lorem.words(20),
+      cover: faker.image.imageUrl()
     };
   }
 }

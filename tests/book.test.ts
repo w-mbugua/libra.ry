@@ -97,7 +97,7 @@ describe('Book Entity Functions', () => {
     });
     expect(response.status).toBe(200);
     expect(response.body.data).not.toBeNull();
-    expect(response.body.data.addBook.status).toBe('available')
+    expect(response.body.data.addBook.status).toBe('available');
     expect(Object.values(response.body.data.addBook)).toContain(
       'The Great Fire'
     );
@@ -182,7 +182,7 @@ describe('Book Entity Functions', () => {
     });
 
     expect(response.error).toBeFalsy();
-    expect(response.body.data.borrow.book.status).toBe('borrowed')
+    expect(response.body.data.borrow.book.status).toBe('borrowed');
     expect(response.status).toBe(200);
   });
 

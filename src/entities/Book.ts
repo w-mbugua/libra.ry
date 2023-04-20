@@ -27,7 +27,7 @@ export class Book {
   title!: string;
 
   @Field(() => String)
-  @Property()
+  @Property({ type: 'text'})
   description: string;
 
   @Field(() => String, { nullable: true })
