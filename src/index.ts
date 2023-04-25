@@ -13,6 +13,16 @@ async function main() {
   app.app.get('/ping', (_req, res) => {
     res.send('pong');
   });
+
+  app.app.post('/testing/reset', async (_req, res) => {
+    if (process.env.NODE_ENV === 'test') {
+      const generator = app.orm.getSchemaGenerator();
+      await generator.dropSchema({ wrap: false });
+      await generator.createSchema({ wrap: false });
+
+      res.status(204).end();
+    }
+  });
 }
 
 main().catch((err) => {
