@@ -108,7 +108,7 @@ export class BookResolver {
 
   @Query(() => [Book])
   async getBooks(@Ctx() { em }: MyContext): Promise<Book[]> {
-    const allBooks = await em.find(Book, {}, { populate: true });
+    const allBooks = await em.find(Book, {}, { populate: true, orderBy: {createdAt: 'DESC'} });
     return allBooks;
   }
 
