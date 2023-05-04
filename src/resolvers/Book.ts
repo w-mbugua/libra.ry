@@ -22,13 +22,7 @@ import { LOAN_PERIOD } from '../utils/constants';
 import { Loan } from '../entities/Loan';
 import { Reservation, ReservationStatus } from '../entities/Reservation';
 import { searchBooksByTitle } from '../utils/getBook';
-import { File } from 'buffer';
-import { handleUpload } from '../utils/imageUploader';
-// @ts-expect-error See Github issue why this exists - https://github.com/jaydenseric/graphql-upload/issues/305#issuecomment-1135285811
-import { Stream } from 'stream';
-
 import { FileUpload, GraphQLUpload } from 'graphql-upload-minimal';
-import { wrap } from '@mikro-orm/core';
 import cloudinary from '../utils/cloudConfig';
 
 @InputType()
