@@ -32,6 +32,14 @@ type BookResponse {
   message: String
 }
 
+input BookUpdateInput {
+  author: String!
+  description: String!
+  id: Int!
+  subtitle: String!
+  title: String!
+}
+
 """
 The javascript `Date` as string. Type represents date and time as the ISO Date string.
 """
@@ -81,7 +89,7 @@ type Mutation {
   logout: Boolean!
   register(newMemberData: NewMemberInput!): MemberResponse!
   reserve(id: Float!): BookResponse!
-  updateBook(newTitle: String, title: String): Book!
+  updateBook(cover: Upload, options: BookUpdateInput!): Book!
 }
 
 input NewBookInput {
@@ -119,3 +127,6 @@ type Tag {
   id: Float!
   name: String!
 }
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload

@@ -22,6 +22,14 @@ import { LOAN_PERIOD } from '../utils/constants';
 import { Loan } from '../entities/Loan';
 import { Reservation, ReservationStatus } from '../entities/Reservation';
 import { searchBooksByTitle } from '../utils/getBook';
+import { File } from 'buffer';
+import { handleUpload } from '../utils/imageUploader';
+// @ts-expect-error See Github issue why this exists - https://github.com/jaydenseric/graphql-upload/issues/305#issuecomment-1135285811
+import { Stream } from 'stream';
+
+import { FileUpload, GraphQLUpload } from 'graphql-upload-minimal';
+import { wrap } from '@mikro-orm/core';
+import cloudinary from '../utils/cloudConfig';
 
 @InputType()
 class NewBookInput {
@@ -33,6 +41,33 @@ class NewBookInput {
 
   @Field(() => String)
   tag: string;
+}
+
+@InputType()
+class BookUpdateInput {
+  @Field(() => Int)
+  id!: number;
+
+  @Field(() => String)
+  title?: string;
+
+  @Field(() => String)
+  subtitle?: string;
+
+  @Field(() => String)
+  author?: string;
+
+  @Field(() => String)
+  description?: string;
+}
+
+@InputType()
+export class FileInput {
+  @Field() filename: string;
+
+  @Field() mimetype: string;
+
+  @Field() encoding: string;
 }
 
 @ObjectType()
@@ -89,26 +124,58 @@ export class BookResolver {
   @Mutation(() => Book)
   @UseMiddleware(isAuth)
   async updateBook(
-    @Arg('title', { nullable: true }) title: string,
-    @Arg('newTitle', { nullable: true }) newTitle: string,
+    @Arg('options') options: BookUpdateInput,
+    @Arg('cover', (type) => GraphQLUpload, { nullable: true })
+    cover: FileUpload,
     @Ctx() { em, req }: MyContext
-  ): Promise<Book> {
+  ): Promise<BookResponse> {
     const userId = req.session.userId;
-    const owner = await em.findOneOrFail(Member, { id: userId });
     const book = await em.findOneOrFail(
       Book,
-      { title: title, owner },
+      { id: options.id },
       { populate: true }
     );
+    if (userId !== book.owner.id)
+      return { book, message: 'you do not have access to this resource' };
 
-    book.title = newTitle;
+    if (options.author) {
+      const authorRef = em.getReference(Author, book.author.id);
+      authorRef.name = options.author;
+      await em.flush();
+    }
+    book.subtitle = options.subtitle || book.subtitle;
+    book.description = options.description || book.description;
+
+    if (cover) {
+      const { createReadStream } = cover;
+      const stream = await cloudinary.uploader.upload_stream(
+        {
+          folder: 'pagepals', // specify the folder name here
+          public_id: cover.filename,
+          overwrite: true,
+        },
+        async function (error: string, result: any) {
+          if (error) {
+            throw new Error(error);
+          }
+          // console.log(result); // Cloudinary response with uploaded image information
+          book.cover = result.secure_url;
+          await em.persistAndFlush(book); // if not, the cover is not saved with the rest of the changes :(
+        }
+      );
+      createReadStream().pipe(stream);
+    }
     await em.persistAndFlush(book);
-    return book;
+    return { book };
   }
 
   @Query(() => [Book])
   async getBooks(@Ctx() { em }: MyContext): Promise<Book[]> {
-    const allBooks = await em.find(Book, {}, { populate: true, orderBy: {createdAt: 'DESC'} });
+    const allBooks = await em.find(
+      Book,
+      {},
+      { populate: true, orderBy: { createdAt: 'DESC' } }
+    );
     return allBooks;
   }
 
