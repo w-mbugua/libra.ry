@@ -23,6 +23,7 @@ import { ApolloServer, BaseContext } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import cors from 'cors';
 import { MyContext } from './types';
+import { graphqlUploadExpress } from 'graphql-upload-minimal'
 
 const RedisStore = connectRedis(session);
 
@@ -94,6 +95,7 @@ export default class Application {
       '/graphql',
       cors<cors.CorsRequest>(this.corsOptions),
       json(),
+      graphqlUploadExpress({ maxFileSize: 1000000, maxFiles: 1 }),
       expressMiddleware(server, {
         context: async ({ req, res }): Promise<MyContext> => {
           if (!req.session && process.env.NODE_ENV === 'test') {
