@@ -111,6 +111,7 @@ type Query {
   getBookById(id: Float!): Book!
   getBooks: [Book!]!
   getTags: [Author!]!
+  searchBook(searchTerm: String!): [Book!]!
 }
 
 type Reservation {

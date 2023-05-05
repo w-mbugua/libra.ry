@@ -2,6 +2,7 @@ import {
   Collection,
   Entity,
   Enum,
+  Index,
   ManyToMany,
   ManyToOne,
   OneToMany,
@@ -14,6 +15,7 @@ import { Loan } from './Loan';
 import { Reservation } from './Reservation';
 import { Tag } from './Tag';
 import { Member } from './Member';
+import { FullTextType } from '@mikro-orm/postgresql';
 
 @ObjectType()
 @Entity()
@@ -23,6 +25,7 @@ export class Book {
   id: number;
 
   @Field(() => String)
+  @Index({ type: 'fulltext' })
   @Property()
   title!: string;
 

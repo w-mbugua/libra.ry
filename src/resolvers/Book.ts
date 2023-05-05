@@ -79,6 +79,20 @@ export class BookResolver {
     return root.description.slice(0, 200);
   }
 
+  @Query(() => [Book])
+  @UseMiddleware(isAuth)
+  async searchBook(
+    @Arg('searchTerm') searchTerm: string,
+    @Ctx() { em }: MyContext
+  ): Promise<Book[]> {
+    const books = await em.find(
+      Book,
+      { title: { $fulltext: searchTerm } },
+      { populate: true }
+    );
+    return books;
+  }
+
   @Mutation(() => Book)
   @UseMiddleware(isAuth)
   async addBook(
