@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, Enum, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import { Field, ObjectType } from 'type-graphql';
 import { Book } from './Book';
 import { Member } from './Member';
@@ -29,4 +29,16 @@ export class Loan {
   @Field(() => Member)
   @ManyToOne(() => Member)
   borrower!: Member;
+
+  @Field({ nullable: true })
+  @Enum(() => LoanStatus)
+  status?: LoanStatus;
+}
+
+export enum LoanStatus {
+  PENDING = 'pending', // The owner has accepted the request and the book is waiting to be picked up by the borrower. or the owner is yet to approve
+  APPROVED = 'approved',
+  CANCELLED = 'cancelled', // by either of the party
+  OVERDUE = 'overdue',
+  RETURNED = 'returned',
 }

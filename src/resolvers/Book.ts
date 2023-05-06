@@ -19,7 +19,7 @@ import { Tag } from '../entities/Tag';
 import { isAuth } from '../middleware/isAuth';
 import { Member } from '../entities/Member';
 import { LOAN_PERIOD } from '../utils/constants';
-import { Loan } from '../entities/Loan';
+import { Loan, LoanStatus } from '../entities/Loan';
 import { Reservation, ReservationStatus } from '../entities/Reservation';
 import { searchBooksByTitle } from '../utils/getBook';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-minimal';
@@ -229,9 +229,10 @@ export class BookResolver {
         createdAt: '',
         updatedAt: '',
         returnDate: new Date(returnDate),
+        status: LoanStatus.PENDING
       });
       book.loans.add(newLoan);
-      book.status = BookStatus.BORROWED;
+      book.status = BookStatus.BORROWED; // book to be borrowed whether loan is pending or approved...to prevent new loans
       await ctx.em.persistAndFlush(book);
 
       await ctx.em.persistAndFlush(newLoan);

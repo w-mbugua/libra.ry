@@ -83,7 +83,5 @@ export enum BookStatus {
   UNAVAILABLE = 'unavailable',
   BORROWED = 'borrowed',
   RESERVED = 'reserved',
-  OVERDUE = 'overdue',
   LOST = 'lost',
-  // RETURNED = 'returned'
 }

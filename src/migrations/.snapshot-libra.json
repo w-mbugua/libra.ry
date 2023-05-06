@@ -211,7 +211,6 @@
             "unavailable",
             "borrowed",
             "reserved",
-            "overdue",
             "lost"
           ],
           "mappedType": "enum"
@@ -220,6 +219,16 @@
       "name": "book",
       "schema": "public",
       "indexes": [
+        {
+          "keyName": "book_title_index",
+          "columnNames": [
+            "title"
+          ],
+          "composite": false,
+          "primary": false,
+          "unique": false,
+          "type": "fulltext"
+        },
         {
           "keyName": "book_pkey",
           "columnNames": [
@@ -316,6 +325,22 @@
           "primary": false,
           "nullable": false,
           "mappedType": "integer"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "enumItems": [
+            "pending",
+            "approved",
+            "cancelled",
+            "overdue",
+            "returned"
+          ],
+          "mappedType": "enum"
         }
       },
       "name": "loan",
