@@ -23,7 +23,9 @@ import { ApolloServer, BaseContext } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import cors from 'cors';
 import { MyContext } from './types';
-import { graphqlUploadExpress } from 'graphql-upload-minimal'
+import { graphqlUploadExpress } from 'graphql-upload-minimal';
+import { LoanResolver } from './resolvers/Loan';
+import { ReservationResolver } from './resolvers/Reservation';
 
 const RedisStore = connectRedis(session);
 
@@ -41,7 +43,7 @@ export default class Application {
       const migrator = this.orm.getMigrator();
       const pending = await migrator.getPendingMigrations();
       console.log('PENDING:', pending.length);
-      if(pending.length) await migrator.up();
+      if (pending.length) await migrator.up();
       await RequestContext.createAsync(this.orm.em, async () => {});
     } catch (err) {
       console.error('DB connection failed');
@@ -77,13 +79,24 @@ export default class Application {
     this.app = express();
     this.corsOptions = {
       credentials: true,
-      origin: ['https://sandbox.embed.apollographql.com', 'http://localhost:3000', 'http://localhost:3001'],
+      origin: [
+        'https://sandbox.embed.apollographql.com',
+        'http://localhost:3000',
+        'http://localhost:3001',
+      ],
       // origin: process.env.CORS_ORIGIN,
     };
 
     //* building schema
     const schema: GraphQLSchema = await buildSchema({
-      resolvers: [MemberResolver, BookResolver, AuthorResolver, TagResolver],
+      resolvers: [
+        MemberResolver,
+        BookResolver,
+        AuthorResolver,
+        TagResolver,
+        LoanResolver,
+        ReservationResolver,
+      ],
       emitSchemaFile: true,
       validate: false,
     });
@@ -112,5 +125,5 @@ export default class Application {
         },
       })
     );
-  }
+  };
 }
