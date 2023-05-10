@@ -17,6 +17,8 @@ import { v4 } from 'uuid';
 import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from '../utils/constants';
 import sendMail from '../utils/sendMail';
 import { isAuth } from '../middleware/isAuth';
+import { Loan } from '../entities/Loan';
+import { Reservation } from '../entities/Reservation';
 
 @InputType()
 export class NewMemberInput {
@@ -68,7 +70,11 @@ export class MemberResolver {
   @Query(() => Member)
   @UseMiddleware(isAuth)
   async currentUser(@Ctx() ctx: MyContext) {
-    const user = await ctx.em.findOne(Member, { id: ctx.req.session.userId });
+    const user = await ctx.em.findOne(
+      Member,
+      { id: ctx.req.session.userId },
+      { populate: true }
+    );
     return user;
   }
 
@@ -100,7 +106,7 @@ export class MemberResolver {
     @Ctx() ctx: MyContext
   ): Promise<MemberResponse> {
     const error = validateLogin(loginInput);
-    
+
     if (error?.length) return { error };
     const member = await ctx.em.findOne(
       Member,
@@ -111,7 +117,10 @@ export class MemberResolver {
     if (!member) {
       return {
         error: [
-          { field: 'username or phone number', message: 'Member not be found. Please check your input' },
+          {
+            field: 'username or phone number',
+            message: 'Member not be found. Please check your input',
+          },
         ],
       };
     }

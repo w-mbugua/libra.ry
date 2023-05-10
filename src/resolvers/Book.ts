@@ -113,7 +113,7 @@ export class BookResolver {
       status: BookStatus.AVAILABLE,
       createdAt: '',
       updatedAt: '',
-      description: bookSearch.volumeInfo.description,
+      description: bookSearch.volumeInfo.description || '',
       subtitle: bookSearch.volumeInfo.subtitle,
       cover: bookSearch.volumeInfo.imageLinks.thumbnail,
     });
@@ -229,7 +229,8 @@ export class BookResolver {
         createdAt: '',
         updatedAt: '',
         returnDate: new Date(returnDate),
-        status: LoanStatus.PENDING
+        status: LoanStatus.PENDING,
+        lender: book.owner
       });
       book.loans.add(newLoan);
       book.status = BookStatus.BORROWED; // book to be borrowed whether loan is pending or approved...to prevent new loans
@@ -258,6 +259,7 @@ export class BookResolver {
       createdAt: '',
       updatedAt: '',
       status: ReservationStatus.PENDING,
+      lender: book.owner
     });
     book.reservations.add(reservation);
     await em.persistAndFlush(book);

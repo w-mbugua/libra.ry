@@ -9,7 +9,7 @@ export async function searchBooksByTitle(
   const response = await axios.get(url);
   let book;
   if (response.status === 200 && response.data.items) {
-    book = response.data.items.find((item: any) => item.volumeInfo.imageLinks);
+    book = response.data.items.find((item: any) => item.volumeInfo.imageLinks && item.volumeInfo.description);
   }
   return book;
 }
