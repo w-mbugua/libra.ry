@@ -326,8 +326,8 @@
           "nullable": false,
           "mappedType": "integer"
         },
-        "loaner_id": {
-          "name": "loaner_id",
+        "lender_id": {
+          "name": "lender_id",
           "type": "int",
           "unsigned": false,
           "autoincrement": false,
@@ -391,10 +391,10 @@
           "referencedTableName": "public.member",
           "updateRule": "cascade"
         },
-        "loan_loaner_id_foreign": {
-          "constraintName": "loan_loaner_id_foreign",
+        "loan_lender_id_foreign": {
+          "constraintName": "loan_lender_id_foreign",
           "columnNames": [
-            "loaner_id"
+            "lender_id"
           ],
           "localTableName": "public.loan",
           "referencedColumnNames": [
@@ -454,6 +454,15 @@
           "nullable": false,
           "mappedType": "integer"
         },
+        "lender_id": {
+          "name": "lender_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
         "status": {
           "name": "status",
           "type": "text",
@@ -500,6 +509,18 @@
           "constraintName": "reservation_reserver_id_foreign",
           "columnNames": [
             "reserver_id"
+          ],
+          "localTableName": "public.reservation",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.member",
+          "updateRule": "cascade"
+        },
+        "reservation_lender_id_foreign": {
+          "constraintName": "reservation_lender_id_foreign",
+          "columnNames": [
+            "lender_id"
           ],
           "localTableName": "public.reservation",
           "referencedColumnNames": [

@@ -81,8 +81,7 @@ export default class Application {
       credentials: true,
       origin: [
         'https://sandbox.embed.apollographql.com',
-        'http://localhost:3000',
-        'http://localhost:3001',
+        'http://localhost:3005',
       ],
       // origin: process.env.CORS_ORIGIN,
     };

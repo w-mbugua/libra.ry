@@ -26,6 +26,10 @@ export class Reservation {
   @ManyToOne(() => Member)
   reserver!: Member;
 
+  @Field(() => Member)
+  @ManyToOne(() => Member)
+  lender: Member;
+
   @Field()
   @Enum(() => ReservationStatus)
   status!: ReservationStatus;

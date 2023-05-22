@@ -55,6 +55,8 @@ type Loan {
   borrower: Member!
   createdAt: DateTime!
   id: Float!
+  lender: Member!
+  loanOverdue: Boolean!
   returnDate: DateTime!
   status: String
   updatedAt: DateTime!
@@ -113,7 +115,9 @@ type Query {
   getBooks: [Book!]!
   getTags: [Author!]!
   loans: [Loan!]!
+  loansByLenderId(lenderId: Float!): [Loan!]!
   reservations: [Reservation!]!
+  reservationsByLenderId(lenderId: Float!): [Reservation!]!
   searchBook(searchTerm: String!): [Book!]!
 }
 
@@ -121,8 +125,10 @@ type Reservation {
   book: Book!
   createdAt: DateTime!
   id: Float!
+  lender: Member!
   reserver: Member!
   status: String!
+  toBorrowDate: Int!
   updatedAt: DateTime!
 }
 

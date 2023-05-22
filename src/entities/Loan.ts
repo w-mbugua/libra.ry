@@ -30,6 +30,10 @@ export class Loan {
   @ManyToOne(() => Member)
   borrower!: Member;
 
+  @Field(() => Member)
+  @ManyToOne(() => Member)
+  lender: Member;
+
   @Field({ nullable: true })
   @Enum(() => LoanStatus)
   status?: LoanStatus;
