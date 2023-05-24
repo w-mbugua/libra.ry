@@ -30,7 +30,7 @@ export class Book {
   title!: string;
 
   @Field(() => String)
-  @Property({ type: 'text'})
+  @Property({ type: 'text' })
   description: string;
 
   @Field(() => String, { nullable: true })
@@ -66,11 +66,13 @@ export class Book {
   owner!: Member;
 
   @Field(() => [Reservation])
-  @OneToMany(() => Reservation, (r: Reservation) => r.book)
+  @OneToMany(() => Reservation, (r: Reservation) => r.book, {
+    orphanRemoval: true,
+  })
   reservations = new Collection<Reservation>(this);
 
   @Field(() => [Loan])
-  @OneToMany(() => Loan, (loan: Loan) => loan.book)
+  @OneToMany(() => Loan, (loan: Loan) => loan.book, { orphanRemoval: true })
   loans = new Collection<Loan>(this);
 
   @Field({ nullable: true })

@@ -31,6 +31,6 @@ export class Member {
   password!: string;
 
   @Field(() => [Book])
-  @OneToMany(() => Book, (book: Book) => book.owner)
+  @OneToMany(() => Book, (book: Book) => book.owner, { orphanRemoval: true })
   books = new Collection<Book>(this);
 }
