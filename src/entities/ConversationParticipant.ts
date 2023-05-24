@@ -1,4 +1,10 @@
-import { Entity, Property, PrimaryKey, ManyToOne, OneToOne } from '@mikro-orm/core';
+import {
+  Entity,
+  Property,
+  PrimaryKey,
+  ManyToOne,
+  OneToOne,
+} from '@mikro-orm/core';
 import { Field } from 'type-graphql';
 import { Member } from './Member';
 import { Conversation } from './Conversation';
@@ -18,14 +24,14 @@ export class ConversationParticipant {
   updatedAt: Date = new Date();
 
   @Field(() => Member)
-  @OneToOne(() => Member)
+  @OneToOne(() => Member, { mapToPk: true })
   member: Member;
 
-  @Field(()=> Conversation)
-  @ManyToOne(()=> Conversation)
-  conversation: Conversation
+  @Field(() => Conversation)
+  @ManyToOne(() => Conversation, { mapToPk: true})
+  conversation: Conversation;
 
   @Field()
   @Property()
-  hasSeenLatestMessage: boolean
+  hasSeenLatestMessage: boolean;
 }

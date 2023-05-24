@@ -23,18 +23,19 @@ export class Conversation {
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
-  @Field(() => String)
-  @Property({ type: 'text' })
-  latestMessage: string;
+  @Field(() => String, { nullable: true })
+  @Property({ type: 'text', nullable: true })
+  latestMessage?: string;
 
-  @Field()
-  @OneToMany(() => Message, (msg) => msg.conversation)
+  @Field(() => [Message])
+  @OneToMany(() => Message, (msg) => msg.conversation, { orphanRemoval: true })
   messages = new Collection<Message>(this);
 
-  @Field()
+  @Field(() => [ConversationParticipant])
   @OneToMany(
     () => ConversationParticipant,
-    (participant) => participant.conversation
+    (participant) => participant.conversation,
+    { orphanRemoval: true }
   )
   participants = new Collection<ConversationParticipant>(this);
 }

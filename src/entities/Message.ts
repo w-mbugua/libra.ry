@@ -32,6 +32,6 @@ export class Message {
   sender: Member;
 
   @Field(() => Conversation)
-  @ManyToOne(() => Conversation)
+  @ManyToOne(() => Conversation,{ mapToPk: true })
   conversation: Conversation;
 }
