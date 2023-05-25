@@ -5,10 +5,11 @@ import {
   ManyToOne,
   OneToOne,
 } from '@mikro-orm/core';
-import { Field } from 'type-graphql';
+import { Field, ObjectType } from 'type-graphql';
 import { Member } from './Member';
 import { Conversation } from './Conversation';
 
+@ObjectType()
 @Entity()
 export class Message {
   @Field()

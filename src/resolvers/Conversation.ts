@@ -1,40 +1,93 @@
-import { Conversation } from 'src/entities/Conversation';
-import { ConversationParticipant } from 'src/entities/ConversationParticipant';
-import { isAuth } from 'src/middleware/isAuth';
-import { MyContext } from 'src/types';
-import { Arg, Field, Mutation, ObjectType, UseMiddleware } from 'type-graphql';
+import { GraphQLError } from 'graphql';
+import { Conversation } from '../entities/Conversation';
+import { ConversationParticipant } from '../entities/ConversationParticipant';
+import { isAuth } from '../middleware/isAuth';
+import { MyContext } from '../types';
+import {
+  Arg,
+  Ctx,
+  Field,
+  InputType,
+  Int,
+  Mutation,
+  ObjectType,
+  Query,
+  UseMiddleware,
+} from 'type-graphql';
 
 @ObjectType()
 class ConversationResponse {
-  @Field()
+  @Field({ nullable: true })
   conversation?: Conversation;
 
-  @Field()
+  @Field({ nullable: true })
   error?: String;
 }
+
+@InputType()
+class conversationsInput {
+  @Field(() => [Int])
+  participantIds: number[];
+}
 export class ConversationResolver {
-  @Mutation()
+  @Query(() => [Conversation])
+  @UseMiddleware(isAuth)
+  async conversations(@Ctx() { req, em }: MyContext): Promise<Conversation[]> {
+    const {
+      session: { userId },
+    } = req;
+    if (!userId) {
+      throw new GraphQLError('Not authorized');
+    }
+    // fetch conversations of a particular user
+    const conversations = await em.find(
+      Conversation,
+      { participants: [userId] },
+      { populate: true }
+    );
+    return conversations;
+  }
+
+  @Mutation(() => ConversationResponse)
   @UseMiddleware(isAuth)
   async createConversation(
-    @Arg('participantIds') participantIds: Array<number>,
-    { req, em }: MyContext
+    @Arg('createConversationData') createConversationData: conversationsInput,
+    @Ctx() { req, em }: MyContext
   ): Promise<ConversationResponse> {
     const {
       session: { userId },
     } = req;
 
+    if (!userId) {
+      throw new GraphQLError('Not authorized!');
+    }
+    const { participantIds } = createConversationData;
+
     try {
+      const conversations = await em.find(Conversation, {}, { populate: true });
+      const conversationExists = conversations.find((c) =>
+        c.participants
+          .toArray()
+          .map((p) => p.id)
+          .every((val) => [...participantIds, userId].includes(val))
+      );
+      console.log({ conversationExists });
+
+      if (conversationExists) {
+        console.log('IT EXISTS');
+        return { conversation: conversationExists };
+      }
       const conversation = em.create(Conversation, {
         createdAt: '',
         updatedAt: '',
       });
-      participantIds.forEach(async (id) => {
+      [userId, ...participantIds].forEach(async (id) => {
         const newParticipant = em.create(ConversationParticipant, {
           hasSeenLatestMessage: id === userId,
           createdAt: '',
           updatedAt: '',
           member: id,
-          conversation,
+          conversation: conversation,
         });
         await em.persistAndFlush(newParticipant);
         conversation.participants.add(newParticipant);

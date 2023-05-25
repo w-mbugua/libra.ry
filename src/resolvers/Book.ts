@@ -133,7 +133,7 @@ export class BookResolver {
   @UseMiddleware(isAuth)
   async updateBook(
     @Arg('options') options: BookUpdateInput,
-    @Arg('cover', (type) => GraphQLUpload, { nullable: true })
+    @Arg('cover', () => GraphQLUpload, { nullable: true })
     cover: FileUpload,
     @Ctx() { em, req }: MyContext
   ): Promise<BookResponse> {

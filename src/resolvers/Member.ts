@@ -7,18 +7,14 @@ import {
   Mutation,
   ObjectType,
   Query,
-  Resolver,
-  UseMiddleware,
+  Resolver
 } from 'type-graphql';
+import { v4 } from 'uuid';
 import { Member } from '../entities/Member';
 import { MyContext } from '../types';
-import { validateLogin, validateRegister } from '../validators/member';
-import { v4 } from 'uuid';
 import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from '../utils/constants';
 import sendMail from '../utils/sendMail';
-import { isAuth } from '../middleware/isAuth';
-import { Loan } from '../entities/Loan';
-import { Reservation } from '../entities/Reservation';
+import { validateLogin, validateRegister } from '../validators/member';
 
 @InputType()
 export class NewMemberInput {

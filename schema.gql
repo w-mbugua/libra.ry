@@ -40,6 +40,29 @@ input BookUpdateInput {
   title: String!
 }
 
+type Conversation {
+  createdAt: DateTime!
+  id: Float!
+  latestMessage: String
+  messages: [Message!]!
+  participants: [ConversationParticipant!]!
+  updatedAt: DateTime!
+}
+
+type ConversationParticipant {
+  conversation: Conversation!
+  createdAt: DateTime!
+  hasSeenLatestMessage: Boolean!
+  id: Float!
+  member: Member!
+  updatedAt: DateTime!
+}
+
+type ConversationResponse {
+  conversation: Conversation
+  error: String
+}
+
 """
 The javascript `Date` as string. Type represents date and time as the ISO Date string.
 """
@@ -81,11 +104,21 @@ type MemberResponse {
   member: Member
 }
 
+type Message {
+  body: String!
+  conversation: Conversation!
+  createdAt: DateTime!
+  id: Float!
+  sender: Member!
+  updatedAt: DateTime!
+}
+
 type Mutation {
   addAuthor(name: String!): Author!
   addBook(newBookData: NewBookInput!): Book!
   borrow(id: Float!): BookResponse!
   changePassword(newPassword: String!, token: String!): Member!
+  createConversation(createConversationData: conversationsInput!): ConversationResponse!
   deleteBook(id: Float!): Int!
   forgotPassword(email: String!): Boolean!
   login(loginInput: LoginInput!): MemberResponse!
@@ -109,6 +142,7 @@ input NewMemberInput {
 }
 
 type Query {
+  conversations: [Conversation!]!
   currentUser: Member!
   getAuthors: [Author!]!
   getBookById(id: Float!): Book!
@@ -140,3 +174,7 @@ type Tag {
 
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
+
+input conversationsInput {
+  participantIds: [Int!]!
+}

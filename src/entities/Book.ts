@@ -15,7 +15,6 @@ import { Loan } from './Loan';
 import { Reservation } from './Reservation';
 import { Tag } from './Tag';
 import { Member } from './Member';
-import { FullTextType } from '@mikro-orm/postgresql';
 
 @ObjectType()
 @Entity()
