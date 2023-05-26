@@ -27,6 +27,7 @@ import { graphqlUploadExpress } from 'graphql-upload-minimal';
 import { LoanResolver } from './resolvers/Loan';
 import { ReservationResolver } from './resolvers/Reservation';
 import { ConversationResolver } from './resolvers/Conversation';
+import { MessageResolver } from './resolvers/Message';
 
 const RedisStore = connectRedis(session);
 
@@ -96,7 +97,8 @@ export default class Application {
         TagResolver,
         LoanResolver,
         ReservationResolver,
-        ConversationResolver
+        ConversationResolver,
+        MessageResolver
       ],
       emitSchemaFile: true,
       validate: false,

@@ -29,10 +29,10 @@ export class Message {
   body: string;
 
   @Field(() => Member)
-  @OneToOne(() => Member)
+  @ManyToOne(() => Member)
   sender: Member;
 
   @Field(() => Conversation)
-  @ManyToOne(() => Conversation,{ mapToPk: true })
+  @ManyToOne(() => Conversation)
   conversation: Conversation;
 }

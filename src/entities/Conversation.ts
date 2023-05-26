@@ -4,6 +4,7 @@ import {
   PrimaryKey,
   OneToMany,
   Collection,
+  ManyToOne,
 } from '@mikro-orm/core';
 import { Field, ObjectType } from 'type-graphql';
 import { Message } from './Message';
@@ -24,13 +25,17 @@ export class Conversation {
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
-  @Field(() => String, { nullable: true })
-  @Property({ type: 'text', nullable: true })
-  latestMessage?: string;
+  // @Field(() => String, { nullable: true })
+  // @Property({ type: 'text', nullable: true })
+  // latestMessage?: string;
 
   @Field(() => [Message])
   @OneToMany(() => Message, (msg) => msg.conversation, { orphanRemoval: true })
   messages = new Collection<Message>(this);
+
+  @Field(() => Message, { nullable: true })
+  @ManyToOne(() => Message, { nullable: true })
+  latestMessage?: Message;
 
   @Field(() => [ConversationParticipant])
   @OneToMany(

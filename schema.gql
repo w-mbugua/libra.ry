@@ -43,7 +43,7 @@ input BookUpdateInput {
 type Conversation {
   createdAt: DateTime!
   id: Float!
-  latestMessage: String
+  latestMessage: Message
   messages: [Message!]!
   participants: [ConversationParticipant!]!
   updatedAt: DateTime!
@@ -113,6 +113,12 @@ type Message {
   updatedAt: DateTime!
 }
 
+input MessageInput {
+  body: String!
+  conversationId: Float!
+  sender: Float!
+}
+
 type Mutation {
   addAuthor(name: String!): Author!
   addBook(newBookData: NewBookInput!): Book!
@@ -125,6 +131,7 @@ type Mutation {
   logout: Boolean!
   register(newMemberData: NewMemberInput!): MemberResponse!
   reserve(id: Float!): BookResponse!
+  sendMessage(messageData: MessageInput!): Message!
   updateBook(cover: Upload, options: BookUpdateInput!): Book!
 }
 
@@ -150,6 +157,7 @@ type Query {
   getTags: [Author!]!
   loans: [Loan!]!
   loansByLenderId(lenderId: Float!): [Loan!]!
+  messages(conversationId: Float!): [Message!]!
   reservations: [Reservation!]!
   reservationsByLenderId(lenderId: Float!): [Reservation!]!
   searchBook(searchTerm: String!): [Book!]!
