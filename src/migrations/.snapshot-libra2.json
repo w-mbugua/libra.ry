@@ -109,6 +109,94 @@
           "nullable": false,
           "mappedType": "integer"
         },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "conversation_id": {
+          "name": "conversation_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "has_seen_latest_message": {
+          "name": "has_seen_latest_message",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "boolean"
+        }
+      },
+      "name": "conversation_participant",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "conversation_participant_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "conversation_participant_conversation_id_foreign": {
+          "constraintName": "conversation_participant_conversation_id_foreign",
+          "columnNames": [
+            "conversation_id"
+          ],
+          "localTableName": "public.conversation_participant",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.conversation",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
         "username": {
           "name": "username",
           "type": "varchar(255)",
@@ -161,115 +249,6 @@
       ],
       "checks": [],
       "foreignKeys": {}
-    },
-    {
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "unsigned": true,
-          "autoincrement": true,
-          "primary": true,
-          "nullable": false,
-          "mappedType": "integer"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamptz(0)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 6,
-          "mappedType": "datetime"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamptz(0)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 6,
-          "mappedType": "datetime"
-        },
-        "member_id": {
-          "name": "member_id",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "integer"
-        },
-        "conversation_id": {
-          "name": "conversation_id",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "integer"
-        },
-        "has_seen_latest_message": {
-          "name": "has_seen_latest_message",
-          "type": "boolean",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "boolean"
-        }
-      },
-      "name": "conversation_participant",
-      "schema": "public",
-      "indexes": [
-        {
-          "columnNames": [
-            "member_id"
-          ],
-          "composite": false,
-          "keyName": "conversation_participant_member_id_unique",
-          "primary": false,
-          "unique": true
-        },
-        {
-          "keyName": "conversation_participant_pkey",
-          "columnNames": [
-            "id"
-          ],
-          "composite": false,
-          "primary": true,
-          "unique": true
-        }
-      ],
-      "checks": [],
-      "foreignKeys": {
-        "conversation_participant_member_id_foreign": {
-          "constraintName": "conversation_participant_member_id_foreign",
-          "columnNames": [
-            "member_id"
-          ],
-          "localTableName": "public.conversation_participant",
-          "referencedColumnNames": [
-            "id"
-          ],
-          "referencedTableName": "public.member",
-          "updateRule": "cascade"
-        },
-        "conversation_participant_conversation_id_foreign": {
-          "constraintName": "conversation_participant_conversation_id_foreign",
-          "columnNames": [
-            "conversation_id"
-          ],
-          "localTableName": "public.conversation_participant",
-          "referencedColumnNames": [
-            "id"
-          ],
-          "referencedTableName": "public.conversation",
-          "updateRule": "cascade"
-        }
-      }
     },
     {
       "columns": {

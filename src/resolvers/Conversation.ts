@@ -42,10 +42,13 @@ export class ConversationResolver {
     // fetch conversations of a particular user
     const conversations = await em.find(
       Conversation,
-      { participants: [userId] },
-      { populate: true }
+      {},
+      { populate: true, orderBy: { createdAt: 'DESC' } }
     );
-    return conversations;
+    return conversations.filter(
+      (conversation) =>
+        !!conversation.participants.toArray().find((p) => p.userId === userId)
+    );
   }
 
   @Mutation(() => ConversationResponse)
@@ -68,7 +71,7 @@ export class ConversationResolver {
       const conversationExists = conversations.find((c) =>
         c.participants
           .toArray()
-          .map((p) => p.id)
+          .map((p) => p.userId)
           .every((val) => [...participantIds, userId].includes(val))
       );
       console.log({ conversationExists });
@@ -86,7 +89,7 @@ export class ConversationResolver {
           hasSeenLatestMessage: id === userId,
           createdAt: '',
           updatedAt: '',
-          member: id,
+          userId: id,
           conversation: conversation,
         });
         await em.persistAndFlush(newParticipant);

@@ -24,9 +24,9 @@ export class ConversationParticipant {
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
-  @Field(() => Member)
-  @OneToOne(() => Member, { mapToPk: true })
-  member: Member;
+  @Field()
+  @Property()
+  userId: number;
 
   @Field(() => Conversation)
   @ManyToOne(() => Conversation)

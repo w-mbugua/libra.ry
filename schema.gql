@@ -54,8 +54,8 @@ type ConversationParticipant {
   createdAt: DateTime!
   hasSeenLatestMessage: Boolean!
   id: Float!
-  member: Member!
   updatedAt: DateTime!
+  userId: Float!
 }
 
 type ConversationResponse {
