@@ -3,8 +3,8 @@ import Application from './application';
 async function main() {
   const app = new Application();
   app.connect();
-  app.init();
   app.initRedis();
+  await app.init();
 
   app.httpServer.listen(process.env.PORT || 4000, () => {
     console.log('listenin on port: ');

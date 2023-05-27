@@ -42,7 +42,7 @@ export default class Application {
   public redisStore: connectRedis.RedisStore;
   public corsOptions: any;
   public port: number = Number(process.env.NODE_ENV) || 4000;
-  public app: express.Application;
+  public app: express.Application = express();
   // can't use express app for subscriptions
   public httpServer: Server<typeof IncomingMessage, typeof ServerResponse>;
   public pubsub: RedisPubSub;
@@ -86,7 +86,6 @@ export default class Application {
   };
 
   public init = async (): Promise<void> => {
-    this.app = express();
     this.corsOptions = {
       credentials: true,
       origin: [
@@ -110,18 +109,18 @@ export default class Application {
       ],
       emitSchemaFile: true,
       validate: false,
+      pubSub: new RedisPubSub({
+        publisher: new Redis(process.env.REDIS_URL as string),
+        subscriber: new Redis(process.env.REDIS_URL as string),
+      }),
     });
 
     // pubsub class
-    this.pubsub = new RedisPubSub({
-      publisher: this.redisClient,
-      subscriber: this.redisClient
-    })
 
     this.httpServer = createServer(this.app);
     const wsServer = new WebSocketServer({
       server: this.httpServer,
-      path: '/graphql',
+      path: '/graphql/subscriptions',
     });
     const serverCleanup = useServer({ schema }, wsServer);
 
@@ -160,7 +159,7 @@ export default class Application {
             res,
             em: this.orm.em.fork(),
             redis: this.redisClient,
-            pubsub: this.pubsub
+            pubsub: this.pubsub,
           };
         },
       })
