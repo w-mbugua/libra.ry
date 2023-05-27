@@ -2,6 +2,7 @@ import { EntityManager, IDatabaseDriver, Connection } from '@mikro-orm/core';
 import { Request, Response } from 'express';
 import { Redis } from 'ioredis';
 import { Session } from 'express-session';
+import { RedisPubSub } from 'graphql-redis-subscriptions';
 declare module 'express-session' {
   interface SessionData {
     userId: number;
@@ -12,6 +13,7 @@ export type MyContext = {
   res: Response;
   em: EntityManager<IDatabaseDriver<Connection>>;
   redis: Redis;
+  pubsub: RedisPubSub;
 };
 
 export interface BookDetails {

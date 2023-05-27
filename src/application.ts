@@ -15,11 +15,14 @@ import session, { Session, SessionData } from 'express-session';
 import { COOKIE_NAME } from './utils/constants';
 import { GraphQLSchema } from 'graphql';
 import { buildSchema } from 'type-graphql';
+import { WebSocketServer } from 'ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
 import { AuthorResolver } from './resolvers/Author';
 import { BookResolver } from './resolvers/Book';
 import { MemberResolver } from './resolvers/Member';
 import { TagResolver } from './resolvers/Tag';
 import { ApolloServer, BaseContext } from '@apollo/server';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { expressMiddleware } from '@apollo/server/express4';
 import cors from 'cors';
 import { MyContext } from './types';
@@ -28,16 +31,21 @@ import { LoanResolver } from './resolvers/Loan';
 import { ReservationResolver } from './resolvers/Reservation';
 import { ConversationResolver } from './resolvers/Conversation';
 import { MessageResolver } from './resolvers/Message';
+import { IncomingMessage, Server, ServerResponse, createServer } from 'http';
+import { RedisPubSub } from 'graphql-redis-subscriptions';
 
 const RedisStore = connectRedis(session);
 
 export default class Application {
   public orm: MikroORM<IDatabaseDriver<Connection>>;
-  public app: express.Application;
   public redisClient: Redis;
   public redisStore: connectRedis.RedisStore;
   public corsOptions: any;
   public port: number = Number(process.env.NODE_ENV) || 4000;
+  public app: express.Application;
+  // can't use express app for subscriptions
+  public httpServer: Server<typeof IncomingMessage, typeof ServerResponse>;
+  public pubsub: RedisPubSub;
 
   public connect = async (): Promise<void> => {
     try {
@@ -98,13 +106,41 @@ export default class Application {
         LoanResolver,
         ReservationResolver,
         ConversationResolver,
-        MessageResolver
+        MessageResolver,
       ],
       emitSchemaFile: true,
       validate: false,
     });
 
-    const server: ApolloServer<BaseContext> = new ApolloServer({ schema });
+    // pubsub class
+    this.pubsub = new RedisPubSub({
+      publisher: this.redisClient,
+      subscriber: this.redisClient
+    })
+
+    this.httpServer = createServer(this.app);
+    const wsServer = new WebSocketServer({
+      server: this.httpServer,
+      path: '/graphql',
+    });
+    const serverCleanup = useServer({ schema }, wsServer);
+
+    const server: ApolloServer<BaseContext> = new ApolloServer({
+      schema,
+      plugins: [
+        ApolloServerPluginDrainHttpServer({ httpServer: this.httpServer }),
+        {
+          async serverWillStart() {
+            return {
+              async drainServer() {
+                await serverCleanup.dispose();
+              },
+            };
+          },
+        },
+      ],
+    });
+
     await server.start();
 
     this.app.use(
@@ -124,6 +160,7 @@ export default class Application {
             res,
             em: this.orm.em.fork(),
             redis: this.redisClient,
+            pubsub: this.pubsub
           };
         },
       })
