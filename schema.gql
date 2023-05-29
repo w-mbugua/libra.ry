@@ -54,6 +54,7 @@ type ConversationParticipant {
   createdAt: DateTime!
   hasSeenLatestMessage: Boolean!
   id: Float!
+  unreadMessages: Float
   updatedAt: DateTime!
   userId: Float!
 }
@@ -96,6 +97,7 @@ type Member {
   email: String!
   id: Float!
   phoneNumber: String!
+  unreadMessages: Float
   username: String!
 }
 
@@ -154,6 +156,7 @@ type Query {
   getAuthors: [Author!]!
   getBookById(id: Float!): Book!
   getBooks: [Book!]!
+  getBooksByOwner(ownerId: Float!): [Book!]!
   getTags: [Author!]!
   loans: [Loan!]!
   loansByLenderId(lenderId: Float!): [Loan!]!
@@ -176,6 +179,7 @@ type Reservation {
 
 type Subscription {
   messageSent(conversationId: Float!): Message!
+  newNotification(userId: Float!): Member!
 }
 
 type Tag {

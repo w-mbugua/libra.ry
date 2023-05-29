@@ -68,11 +68,7 @@ export class MemberResolver {
   @Query(() => Member)
   @UseMiddleware(isAuth)
   async currentUser(@Ctx() ctx: MyContext) {
-    const user = await ctx.em.findOne(
-      Member,
-      { id: ctx.req.session.userId },
-      { populate: true }
-    );
+    const user = await ctx.em.findOne(Member, { id: ctx.req.session.userId });
     return user;
   }
 

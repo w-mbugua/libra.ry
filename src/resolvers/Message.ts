@@ -6,7 +6,6 @@ import { isAuth } from '../middleware/isAuth';
 import { MyContext } from '../types';
 import {
   Arg,
-  Args,
   Ctx,
   Field,
   InputType,
@@ -18,8 +17,8 @@ import {
   Subscription,
   UseMiddleware,
 } from 'type-graphql';
-import { withFilter } from 'graphql-subscriptions';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
+import { MESSAGE_SENT, NOTIFICATION } from '../utils/events';
 
 @InputType()
 class MessageInput {
@@ -45,7 +44,7 @@ export class MessageResolver {
       const messages = await em.find(
         Message,
         { conversation: conversationId },
-        { populate: true, orderBy: {createdAt: 'DESC'} }
+        { populate: true, orderBy: { createdAt: 'DESC' } }
       );
       return messages;
     } catch (err: any) {
@@ -59,7 +58,7 @@ export class MessageResolver {
     @Arg('messageData') messageData: MessageInput,
     @Ctx() { req, em }: MyContext,
     @PubSub() pubsub: RedisPubSub
-  ) {
+  ): Promise<Message> {
     const {
       session: { userId },
     } = req;
@@ -71,9 +70,13 @@ export class MessageResolver {
     }
 
     try {
-      const conversationExists = await em.findOneOrFail(Conversation, {
-        id: conversationId,
-      });
+      const conversationExists = await em.findOneOrFail(
+        Conversation,
+        {
+          id: conversationId,
+        },
+        { populate: ['participants'] }
+      );
       // should always exist
       if (!conversationExists) {
         throw new GraphQLError('Conversation not found');
@@ -91,13 +94,33 @@ export class MessageResolver {
       await em.persistAndFlush(conversationExists);
 
       const senderDetails = await em.findOne(Member, { id: sender });
-      await pubsub.publish('MESSAGE_SENT', {
+
+      await pubsub.publish(MESSAGE_SENT, {
         messageSent: {
           ...newMsg,
           sender: { id: senderDetails?.id, username: senderDetails?.username },
         },
       });
-      // publish event
+
+      const otherParticipant = conversationExists.participants
+        .toArray()
+        .map((p) => p.userId)
+        .filter((id) => id !== userId)[0];
+
+      // update unread msg count for non-senders
+      const memberDetails = await em.findOneOrFail(Member, {
+        id: otherParticipant,
+      });
+      if (memberDetails) {
+        memberDetails.unreadMessages = memberDetails.unreadMessages
+          ? (memberDetails.unreadMessages += 1)
+          : 1;
+        console.log({ memberDetails });
+
+        pubsub.publish(NOTIFICATION, { user: { ...memberDetails } });
+      }
+      await em.persistAndFlush(memberDetails);
+
       return newMsg;
     } catch (err: any) {
       console.log('CREATE MSG ERROR', err);
@@ -106,7 +129,7 @@ export class MessageResolver {
   }
 
   @Subscription({
-    topics: 'MESSAGE_SENT',
+    topics: MESSAGE_SENT,
     filter: ({ payload, args }) =>
       payload.messageSent.conversation.id === args.conversationId,
   })
@@ -121,5 +144,23 @@ export class MessageResolver {
       createdAt: new Date(messageSentPayload.messageSent.createdAt),
       updatedAt: new Date(messageSentPayload.messageSent.updatedAt),
     };
+  }
+
+  @Subscription({
+    topics: NOTIFICATION,
+    filter: ({ payload, args }) => {
+      console.log('USER', payload.user.id, args.userId);
+      console.log('USERNAME', payload.user.username);
+
+      return payload.user.id === args.userId;
+    },
+  })
+  newNotification(
+    @Root() notificationPayload: { user: Member },
+    @Arg('userId') userId: number
+  ): Member {
+    console.log('NOTIFICATION!!', notificationPayload.user.username);
+
+    return notificationPayload.user;
   }
 }

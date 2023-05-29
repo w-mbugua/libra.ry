@@ -187,6 +187,19 @@ export class BookResolver {
     return allBooks;
   }
 
+  @Query(() => [Book])
+  async getBooksByOwner(
+    @Arg('ownerId') ownerId: number,
+    @Ctx() { em }: MyContext
+  ): Promise<Book[]> {
+    const books = await em.find(
+      Book,
+      { owner: ownerId },
+      { populate: true, orderBy: { createdAt: 'DESC' } }
+    );
+    return books;
+  }
+
   @Query(() => Book)
   async getBookById(
     @Arg('id') id: number,
@@ -230,7 +243,7 @@ export class BookResolver {
         updatedAt: '',
         returnDate: new Date(returnDate),
         status: LoanStatus.PENDING,
-        lender: book.owner
+        lender: book.owner,
       });
       book.loans.add(newLoan);
       book.status = BookStatus.BORROWED; // book to be borrowed whether loan is pending or approved...to prevent new loans
@@ -259,7 +272,7 @@ export class BookResolver {
       createdAt: '',
       updatedAt: '',
       status: ReservationStatus.PENDING,
-      lender: book.owner
+      lender: book.owner,
     });
     book.reservations.add(reservation);
     await em.persistAndFlush(book);
