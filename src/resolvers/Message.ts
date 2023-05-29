@@ -6,14 +6,20 @@ import { isAuth } from '../middleware/isAuth';
 import { MyContext } from '../types';
 import {
   Arg,
+  Args,
   Ctx,
   Field,
   InputType,
   Mutation,
+  PubSub,
   Query,
   Resolver,
+  Root,
+  Subscription,
   UseMiddleware,
 } from 'type-graphql';
+import { withFilter } from 'graphql-subscriptions';
+import { RedisPubSub } from 'graphql-redis-subscriptions';
 
 @InputType()
 class MessageInput {
@@ -39,7 +45,7 @@ export class MessageResolver {
       const messages = await em.find(
         Message,
         { conversation: conversationId },
-        { populate: true }
+        { populate: true, orderBy: {createdAt: 'DESC'} }
       );
       return messages;
     } catch (err: any) {
@@ -51,7 +57,8 @@ export class MessageResolver {
   @UseMiddleware(isAuth)
   async sendMessage(
     @Arg('messageData') messageData: MessageInput,
-    @Ctx() { req, em }: MyContext
+    @Ctx() { req, em }: MyContext,
+    @PubSub() pubsub: RedisPubSub
   ) {
     const {
       session: { userId },
@@ -79,15 +86,40 @@ export class MessageResolver {
         conversation: conversationExists.id,
       });
 
-      await em.persistAndFlush(newMsg);
       conversationExists.latestMessage = newMsg;
+      await em.persistAndFlush(newMsg);
       await em.persistAndFlush(conversationExists);
 
+      const senderDetails = await em.findOne(Member, { id: sender });
+      await pubsub.publish('MESSAGE_SENT', {
+        messageSent: {
+          ...newMsg,
+          sender: { id: senderDetails?.id, username: senderDetails?.username },
+        },
+      });
       // publish event
       return newMsg;
     } catch (err: any) {
       console.log('CREATE MSG ERROR', err);
       throw new GraphQLError(err?.message);
     }
+  }
+
+  @Subscription({
+    topics: 'MESSAGE_SENT',
+    filter: ({ payload, args }) =>
+      payload.messageSent.conversation.id === args.conversationId,
+  })
+  messageSent(
+    @Root() messageSentPayload: { messageSent: Message },
+    @Arg('conversationId') conversationId: number
+  ): Message {
+    console.log('SUBSCRIPTION', messageSentPayload);
+
+    return {
+      ...messageSentPayload.messageSent,
+      createdAt: new Date(messageSentPayload.messageSent.createdAt),
+      updatedAt: new Date(messageSentPayload.messageSent.updatedAt),
+    };
   }
 }

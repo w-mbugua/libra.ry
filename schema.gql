@@ -174,6 +174,10 @@ type Reservation {
   updatedAt: DateTime!
 }
 
+type Subscription {
+  messageSent(conversationId: Float!): Message!
+}
+
 type Tag {
   books: [Book!]!
   id: Float!

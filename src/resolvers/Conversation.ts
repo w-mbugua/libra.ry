@@ -74,10 +74,8 @@ export class ConversationResolver {
           .map((p) => p.userId)
           .every((val) => [...participantIds, userId].includes(val))
       );
-      console.log({ conversationExists });
 
       if (conversationExists) {
-        console.log('IT EXISTS');
         return { conversation: conversationExists };
       }
       const conversation = em.create(Conversation, {
