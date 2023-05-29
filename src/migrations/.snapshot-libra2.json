@@ -79,6 +79,16 @@
           "nullable": false,
           "mappedType": "string"
         },
+        "unread_messages": {
+          "name": "unread_messages",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "default": "0",
+          "mappedType": "integer"
+        },
         "password": {
           "name": "password",
           "type": "varchar(255)",
@@ -633,6 +643,15 @@
           "primary": false,
           "nullable": false,
           "mappedType": "boolean"
+        },
+        "unread_messages": {
+          "name": "unread_messages",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
         }
       },
       "name": "conversation_participant",
