@@ -27,6 +27,10 @@ export class Member {
   @Property()
   phoneNumber!: string;
 
+  @Field({ nullable: true })
+  @Property({ nullable: true })
+  unreadMessages?: number = 0;
+
   @Property()
   password!: string;
 

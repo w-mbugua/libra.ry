@@ -35,4 +35,8 @@ export class ConversationParticipant {
   @Field()
   @Property()
   hasSeenLatestMessage: boolean;
+
+  @Field({ nullable: true })
+  @Property({ nullable: true })
+  unreadMessages?: number;
 }
