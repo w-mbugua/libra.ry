@@ -12,8 +12,11 @@ import {
   Mutation,
   ObjectType,
   Query,
+  Root,
+  Subscription,
   UseMiddleware,
 } from 'type-graphql';
+import { CONVERSATION_UPDATED } from '../utils/events';
 
 @ObjectType()
 class ConversationResponse {
@@ -43,7 +46,10 @@ export class ConversationResolver {
     const conversations = await em.find(
       Conversation,
       {},
-      { populate: true, orderBy: { createdAt: 'DESC' } }
+      {
+        populate: ['latestMessage', 'participants', 'messages.sender'],
+        orderBy: { createdAt: 'DESC' },
+      }
     );
     return conversations.filter(
       (conversation) =>

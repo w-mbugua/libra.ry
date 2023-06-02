@@ -131,6 +131,8 @@ type Mutation {
   forgotPassword(email: String!): Boolean!
   login(loginInput: LoginInput!): MemberResponse!
   logout: Boolean!
+  markConversationAsRead(conversationId: Float!): Conversation!
+  markNotificationsAsRead: Member!
   register(newMemberData: NewMemberInput!): MemberResponse!
   reserve(id: Float!): BookResponse!
   sendMessage(messageData: MessageInput!): Message!
@@ -180,6 +182,7 @@ type Reservation {
 type Subscription {
   messageSent(conversationId: Float!): Message!
   newNotification(userId: Float!): Member!
+  updatedConversation(conversationId: Float!): Conversation!
 }
 
 type Tag {

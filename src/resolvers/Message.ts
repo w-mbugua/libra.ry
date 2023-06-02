@@ -18,7 +18,12 @@ import {
   UseMiddleware,
 } from 'type-graphql';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
-import { MESSAGE_SENT, NOTIFICATION } from '../utils/events';
+import {
+  CONVERSATION_UPDATED,
+  MESSAGE_SENT,
+  NOTIFICATION,
+} from '../utils/events';
+import { ConversationParticipant } from '../entities/ConversationParticipant';
 
 @InputType()
 class MessageInput {
@@ -75,7 +80,9 @@ export class MessageResolver {
         {
           id: conversationId,
         },
-        { populate: ['participants'] }
+        {
+          populate: ['participants', 'latestMessage'],
+        }
       );
       // should always exist
       if (!conversationExists) {
@@ -91,40 +98,101 @@ export class MessageResolver {
 
       conversationExists.latestMessage = newMsg;
       await em.persistAndFlush(newMsg);
-      await em.persistAndFlush(conversationExists);
 
       const senderDetails = await em.findOne(Member, { id: sender });
 
-      await pubsub.publish(MESSAGE_SENT, {
-        messageSent: {
-          ...newMsg,
-          sender: { id: senderDetails?.id, username: senderDetails?.username },
-        },
+      const msgToPublish = {
+        ...newMsg,
+        sender: { id: senderDetails?.id, username: senderDetails?.username },
+      };
+      pubsub.publish(MESSAGE_SENT, {
+        messageSent: msgToPublish,
       });
 
-      const otherParticipant = conversationExists.participants
-        .toArray()
-        .map((p) => p.userId)
-        .filter((id) => id !== userId)[0];
+      pubsub.publish(CONVERSATION_UPDATED, {
+        conversation: { ...conversationExists, latestMessage: msgToPublish },
+      });
+
+      const participants = await em.find(ConversationParticipant, {
+        conversation: conversationExists.id,
+      });
+      let otherParticipants: number[] = []; // for now it's only one item
+      participants.forEach((p) => {
+        if (p.userId === sender) {
+          p.hasSeenLatestMessage = true;
+        } else {
+          otherParticipants = [p.userId, ...otherParticipants];
+          p.hasSeenLatestMessage = false;
+        }
+      });
+      await em.persistAndFlush([...participants]);
 
       // update unread msg count for non-senders
       const memberDetails = await em.findOneOrFail(Member, {
-        id: otherParticipant,
+        id: otherParticipants[0],
       });
       if (memberDetails) {
         memberDetails.unreadMessages = memberDetails.unreadMessages
           ? (memberDetails.unreadMessages += 1)
           : 1;
-        console.log({ memberDetails });
 
         pubsub.publish(NOTIFICATION, { user: { ...memberDetails } });
       }
+
+      await em.persistAndFlush(conversationExists);
       await em.persistAndFlush(memberDetails);
 
       return newMsg;
     } catch (err: any) {
       console.log('CREATE MSG ERROR', err);
       throw new GraphQLError(err?.message);
+    }
+  }
+
+  @Mutation(() => Member)
+  async markNotificationsAsRead(
+    @Ctx() { req, em }: MyContext
+  ): Promise<Member> {
+    const { userId } = req.session;
+    if (!userId) {
+      throw new GraphQLError('Not authorized!');
+    }
+    try {
+      const user = await em.findOneOrFail(Member, { id: userId });
+      user.unreadMessages = 0;
+      await em.persistAndFlush(user);
+      return user;
+    } catch (err) {
+      throw new GraphQLError(err);
+    }
+  }
+
+  @Mutation(() => Conversation)
+  async markConversationAsRead(
+    @Arg('conversationId') conversationId: number,
+    @Ctx() { req, em }: MyContext
+  ) {
+    const {
+      session: { userId },
+    } = req;
+    try {
+      const conversation = await em.findOneOrFail(
+        Conversation,
+        {
+          id: conversationId,
+        },
+        { populate: ['participants'] }
+      );
+      const activeParticipant = await em.findOneOrFail(
+        ConversationParticipant,
+        { conversation: conversationId, userId }
+      );
+      activeParticipant.hasSeenLatestMessage = true;
+      await em.persistAndFlush(activeParticipant);
+      return conversation;
+    } catch (err: any) {
+      console.log("Couldn't fetch messages");
+      throw new GraphQLError('Error fetching messages ' + err.message);
     }
   }
 
@@ -137,8 +205,6 @@ export class MessageResolver {
     @Root() messageSentPayload: { messageSent: Message },
     @Arg('conversationId') conversationId: number
   ): Message {
-    console.log('SUBSCRIPTION', messageSentPayload);
-
     return {
       ...messageSentPayload.messageSent,
       createdAt: new Date(messageSentPayload.messageSent.createdAt),
@@ -148,19 +214,37 @@ export class MessageResolver {
 
   @Subscription({
     topics: NOTIFICATION,
-    filter: ({ payload, args }) => {
-      console.log('USER', payload.user.id, args.userId);
-      console.log('USERNAME', payload.user.username);
-
-      return payload.user.id === args.userId;
-    },
+    filter: ({ payload, args }) => payload.user.id === args.userId,
   })
   newNotification(
     @Root() notificationPayload: { user: Member },
     @Arg('userId') userId: number
   ): Member {
-    console.log('NOTIFICATION!!', notificationPayload.user.username);
-
     return notificationPayload.user;
+  }
+
+  @Subscription({
+    topics: CONVERSATION_UPDATED,
+    filter: ({ payload, args }) =>
+      payload.conversation.id === args.conversationId,
+  })
+  updatedConversation(
+    @Root() updatedConversationPayload: { conversation: Conversation },
+    @Arg('conversationId') conversationId: number
+  ): Conversation {
+    const newConversation = updatedConversationPayload.conversation;
+
+    return {
+      ...newConversation,
+      createdAt: new Date(newConversation.createdAt),
+      updatedAt: new Date(newConversation.updatedAt),
+      latestMessage: newConversation.latestMessage
+        ? {
+            ...newConversation.latestMessage,
+            createdAt: new Date(newConversation.latestMessage.createdAt || ''),
+            updatedAt: new Date(newConversation.latestMessage.updatedAt || ''),
+          }
+        : undefined,
+    };
   }
 }

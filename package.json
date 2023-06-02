@@ -35,6 +35,7 @@
     "express-session": "^1.17.3",
     "graphql": "^16.6.0",
     "graphql-redis-subscriptions": "^2.6.0",
+    "graphql-scalars": "^1.22.1",
     "graphql-upload-minimal": "^1.5.4",
     "graphql-ws": "^5.13.1",
     "ioredis": "^5.3.1",
