@@ -6,7 +6,7 @@ import { MyContext } from '../types';
 @Resolver()
 export class TagResolver {
   @Mutation(() => Author)
-  async addAuthor(
+  async addTag(
     @Arg('name') name: string,
     @Ctx() { em }: MyContext
   ): Promise<Author> {
@@ -15,7 +15,7 @@ export class TagResolver {
     return newTag;
   }
 
-  @Query(() => [Author])
+  @Query(() => [Tag])
   async getTags(@Ctx() { em }: MyContext): Promise<Author[]> {
     const allTags = await em.find(Tag, {}, { populate: true });
     return allTags;

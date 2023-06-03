@@ -122,8 +122,9 @@ input MessageInput {
 }
 
 type Mutation {
-  addAuthor(name: String!): Author!
+  addAuthor(newAuthorData: NewAuthorInput!): Author!
   addBook(newBookData: NewBookInput!): Book!
+  addTag(name: String!): Author!
   borrow(id: Float!): BookResponse!
   changePassword(newPassword: String!, token: String!): Member!
   createConversation(createConversationData: conversationsInput!): ConversationResponse!
@@ -137,6 +138,10 @@ type Mutation {
   reserve(id: Float!): BookResponse!
   sendMessage(messageData: MessageInput!): Message!
   updateBook(cover: Upload, options: BookUpdateInput!): Book!
+}
+
+input NewAuthorInput {
+  name: String!
 }
 
 input NewBookInput {
@@ -159,7 +164,7 @@ type Query {
   getBookById(id: Float!): Book!
   getBooks: [Book!]!
   getBooksByOwner(ownerId: Float!): [Book!]!
-  getTags: [Author!]!
+  getTags: [Tag!]!
   loans: [Loan!]!
   loansByLenderId(lenderId: Float!): [Loan!]!
   messages(conversationId: Float!): [Message!]!
