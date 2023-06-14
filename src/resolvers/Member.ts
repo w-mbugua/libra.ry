@@ -80,16 +80,14 @@ export class MemberResolver {
     if (error?.length) return { error };
 
     const hashedPassword = await argon2.hash(newMemberData.password);
-    console.log('HASHED', hashedPassword);
 
     const member = ctx.em.create(Member, {
       ...newMemberData,
       password: hashedPassword,
     });
-    console.log('MEMBER', member);
 
     await ctx.em.persistAndFlush(member);
-    ctx.req.session.userId = member.id;
+    // ctx.req.session.userId = member.id;
     return { member };
   }
 

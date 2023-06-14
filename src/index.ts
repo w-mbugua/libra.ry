@@ -6,8 +6,9 @@ async function main() {
   app.initRedis();
   await app.init();
 
-  app.httpServer.listen(process.env.PORT || 4000, () => {
-    console.log('listenin on port: ');
+  const port = process.env.PORT || 4000;
+  app.httpServer.listen(port, () => {
+    console.log('listenin on port: ', port);
   });
 
   app.app.get('/ping', (_req, res) => {
