@@ -35,5 +35,8 @@ export interface BookDetails {
       thumbnail: string;
     };
   };
+  searchInfo?: {
+    textSnippet: string
+  }
 }
 

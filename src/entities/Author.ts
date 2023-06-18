@@ -1,4 +1,5 @@
 import {
+  Cascade,
   Collection,
   Entity,
   OneToMany,
@@ -16,10 +17,12 @@ export class Author {
   id: number;
 
   @Field()
-  @Property({ hidden: true })
+  @Property({ hidden: true, unique: true })
   name!: string;
 
   @Field(() => [Book])
-  @OneToMany(() => Book, (book: Book) => book.author)
+  @OneToMany(() => Book, (book: Book) => book.author, {
+    cascade: [Cascade.PERSIST],
+  })
   books = new Collection<Book>(this);
 }

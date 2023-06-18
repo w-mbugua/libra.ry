@@ -21,9 +21,10 @@ import { Member } from '../entities/Member';
 import { LOAN_PERIOD } from '../utils/constants';
 import { Loan, LoanStatus } from '../entities/Loan';
 import { Reservation, ReservationStatus } from '../entities/Reservation';
-import { searchBooksByTitle } from '../utils/getBook';
+import { searchBooksByTitle, truncateDescription } from '../utils/getBook';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-minimal';
 import cloudinary from '../utils/cloudConfig';
+import { GraphQLError } from 'graphql';
 
 @InputType()
 class NewBookInput {
@@ -45,7 +46,7 @@ class BookUpdateInput {
   @Field(() => String)
   title?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   subtitle?: string;
 
   @Field(() => String)
@@ -93,43 +94,51 @@ export class BookResolver {
     return books;
   }
 
-  @Mutation(() => Book)
+  @Mutation(() => BookResponse)
   @UseMiddleware(isAuth)
   async addBook(
     @Arg('newBookData') newBookData: NewBookInput,
     @Ctx() { em, req }: MyContext
-  ): Promise<Book> {
+  ): Promise<BookResponse> {
     const { author, title } = newBookData;
-    // create author
-    const newAuthor = em.create(Author, { name: author });
-    const member = await em.findOneOrFail(Member, { id: req.session.userId });
-    const bookSearch = await searchBooksByTitle(title);
-    console.log(bookSearch);
 
-    const newBook = em.create(Book, {
-      title,
-      author: newAuthor,
-      owner: member,
-      status: BookStatus.AVAILABLE,
-      createdAt: '',
-      updatedAt: '',
-      description: bookSearch.volumeInfo.description || '',
-      subtitle: bookSearch.volumeInfo.subtitle,
-      cover: bookSearch.volumeInfo.imageLinks.thumbnail,
-    });
-    newAuthor.books.add(newBook);
-    if (newBookData.tag) {
-      const newTag = em.create(Tag, { name: newBookData.tag });
-      newBook.tags.add(newTag);
-      newTag.books.add(newBook);
-      await em.persistAndFlush(newTag);
+    try {
+      const existingAuthor = await em.findOne(Author, { name: author });
+      const newAuthor = existingAuthor
+        ? existingAuthor
+        : em.create(Author, { name: author });
+
+      const bookSearch = await searchBooksByTitle(title, author);
+      console.log(bookSearch);
+      const owner = await em.findOneOrFail(Member, { id: req.session.userId });
+      const newBook = em.create(Book, {
+        title,
+        author: newAuthor,
+        owner,
+        status: BookStatus.AVAILABLE,
+        createdAt: '',
+        updatedAt: '',
+        description:
+          truncateDescription(bookSearch.book.volumeInfo.description) || '',
+        subtitle: bookSearch.book.volumeInfo.subtitle,
+        cover: bookSearch.book.volumeInfo.imageLinks.thumbnail,
+      });
+
+      if (newBookData.tag) {
+        const newTag =
+          (await em.findOne(Tag, { name: newBookData.tag })) ||
+          em.create(Tag, { name: newBookData.tag });
+        newBook.tags.add(newTag);
+        newTag.books.add(newBook);
+      }
+      await em.persistAndFlush(newBook);
+      return { book: newBook, message: bookSearch.error };
+    } catch (err) {
+      throw new GraphQLError(err.message);
     }
-    await em.persistAndFlush(newAuthor);
-    await em.persistAndFlush(newBook);
-    return newBook;
   }
 
-  @Mutation(() => Book)
+  @Mutation(() => BookResponse)
   @UseMiddleware(isAuth)
   async updateBook(
     @Arg('options') options: BookUpdateInput,
@@ -141,7 +150,7 @@ export class BookResolver {
     const book = await em.findOneOrFail(
       Book,
       { id: options.id },
-      { populate: true }
+      { populate: ['owner'] }
     );
     if (userId !== book.owner.id)
       return { book, message: 'you do not have access to this resource' };
@@ -153,12 +162,14 @@ export class BookResolver {
     }
     book.subtitle = options.subtitle || book.subtitle;
     book.description = options.description || book.description;
+    console.log('HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', cover);
 
     if (cover) {
+      console.log('COVER', cover);
       const { createReadStream } = cover;
       const stream = await cloudinary.uploader.upload_stream(
         {
-          folder: 'pagepals', // specify the folder name here
+          folder: 'pagepals',
           public_id: cover.filename,
           overwrite: true,
         },
@@ -166,7 +177,7 @@ export class BookResolver {
           if (error) {
             throw new Error(error);
           }
-          // console.log(result); // Cloudinary response with uploaded image information
+          console.log(result); // Cloudinary response with uploaded image information
           book.cover = result.secure_url;
           await em.persistAndFlush(book); // if not, the cover is not saved with the rest of the changes :(
         }
@@ -216,8 +227,12 @@ export class BookResolver {
     @Ctx() { em, req }: MyContext
   ): Promise<number> {
     const userId = req.session.userId;
-    const owner = await em.findOneOrFail(Member, { id: userId });
-    await em.nativeDelete(Book, { id, owner });
+    try {
+      const book = await em.findOneOrFail(Book, { id, owner: userId });
+      await em.getRepository(Book).removeAndFlush(book);
+    } catch (err) {
+      throw new GraphQLError(err.message);
+    }
     return 204;
   }
 

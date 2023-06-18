@@ -36,7 +36,7 @@ input BookUpdateInput {
   author: String!
   description: String!
   id: Int!
-  subtitle: String!
+  subtitle: String
   title: String!
 }
 
@@ -123,7 +123,7 @@ input MessageInput {
 
 type Mutation {
   addAuthor(newAuthorData: NewAuthorInput!): Author!
-  addBook(newBookData: NewBookInput!): Book!
+  addBook(newBookData: NewBookInput!): BookResponse!
   addTag(name: String!): Author!
   borrow(id: Float!): BookResponse!
   changePassword(newPassword: String!, token: String!): Member!
@@ -137,7 +137,7 @@ type Mutation {
   register(newMemberData: NewMemberInput!): MemberResponse!
   reserve(id: Float!): BookResponse!
   sendMessage(messageData: MessageInput!): Message!
-  updateBook(cover: Upload, options: BookUpdateInput!): Book!
+  updateBook(cover: Upload, options: BookUpdateInput!): BookResponse!
 }
 
 input NewAuthorInput {

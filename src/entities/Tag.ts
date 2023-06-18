@@ -10,7 +10,7 @@ export class Tag {
   id: number;
 
   @Field(() => String)
-  @Property()
+  @Property({ unique: true })
   name: string;
 
   @Field(() => [Book])

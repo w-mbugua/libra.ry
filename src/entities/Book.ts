@@ -1,4 +1,5 @@
 import {
+    Cascade,
   Collection,
   Entity,
   Enum,
@@ -53,11 +54,11 @@ export class Book {
   updatedAt: Date = new Date();
 
   @Field(() => [Tag])
-  @ManyToMany({ entity: () => Tag, inversedBy: 'books' })
+  @ManyToMany({ entity: () => Tag, inversedBy: 'books', cascade: [Cascade.REMOVE] })
   tags = new Collection<Tag>(this);
 
   @Field(() => Author)
-  @ManyToOne(() => Author)
+  @ManyToOne(() => Author, {onDelete: 'cascade'})
   author!: Author;
 
   @Field(() => Member)

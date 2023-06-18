@@ -29,6 +29,15 @@
       "schema": "public",
       "indexes": [
         {
+          "columnNames": [
+            "name"
+          ],
+          "composite": false,
+          "keyName": "author_name_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "author_pkey",
           "columnNames": [
             "id"
@@ -261,6 +270,7 @@
             "id"
           ],
           "referencedTableName": "public.author",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         },
         "book_owner_id_foreign": {
@@ -870,6 +880,15 @@
       "name": "tag",
       "schema": "public",
       "indexes": [
+        {
+          "columnNames": [
+            "name"
+          ],
+          "composite": false,
+          "keyName": "tag_name_unique",
+          "primary": false,
+          "unique": true
+        },
         {
           "keyName": "tag_pkey",
           "columnNames": [
