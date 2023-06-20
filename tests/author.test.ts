@@ -54,7 +54,7 @@ describe('Author Functions', () => {
   it('should add author', async () => {
     const response = await request.post('/graphql').send({
       query: `mutation {
-		addAuthor(name: "Jeffrey Archer") {
+		addAuthor("newAuthorData": {name: "Jeffrey Archer"}) {
 		  name
 		  books {
 			title
@@ -65,6 +65,8 @@ describe('Author Functions', () => {
 		`,
     });
     const data = response.body.data;
+    console.log(response.error);
+
     expect(response.status).toBe(200);
     expect(data).not.toBeNull();
     expect(data.addAuthor.name).toBe('Jeffrey Archer');

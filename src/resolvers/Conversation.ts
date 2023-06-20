@@ -12,11 +12,8 @@ import {
   Mutation,
   ObjectType,
   Query,
-  Root,
-  Subscription,
   UseMiddleware,
 } from 'type-graphql';
-import { CONVERSATION_UPDATED } from '../utils/events';
 
 @ObjectType()
 class ConversationResponse {

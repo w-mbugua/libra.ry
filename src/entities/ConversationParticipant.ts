@@ -1,12 +1,10 @@
 import {
   Entity,
-  Property,
-  PrimaryKey,
   ManyToOne,
-  OneToOne,
+  PrimaryKey,
+  Property
 } from '@mikro-orm/core';
 import { Field, ObjectType } from 'type-graphql';
-import { Member } from './Member';
 import { Conversation } from './Conversation';
 
 @ObjectType()

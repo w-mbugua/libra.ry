@@ -203,6 +203,7 @@ export class MessageResolver {
   })
   messageSent(
     @Root() messageSentPayload: { messageSent: Message },
+    // @ts-ignore
     @Arg('conversationId') conversationId: number
   ): Message {
     return {
@@ -218,6 +219,7 @@ export class MessageResolver {
   })
   newNotification(
     @Root() notificationPayload: { user: Member },
+    // @ts-ignore
     @Arg('userId') userId: number
   ): Member {
     return notificationPayload.user;
@@ -230,6 +232,7 @@ export class MessageResolver {
   })
   updatedConversation(
     @Root() updatedConversationPayload: { conversation: Conversation },
+    // @ts-ignore
     @Arg('conversationId') conversationId: number
   ): Conversation {
     const newConversation = updatedConversationPayload.conversation;

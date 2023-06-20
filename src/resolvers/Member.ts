@@ -8,7 +8,6 @@ import {
   ObjectType,
   Query,
   Resolver,
-  UseMiddleware,
 } from 'type-graphql';
 import { v4 } from 'uuid';
 import { Member } from '../entities/Member';
@@ -16,7 +15,6 @@ import { MyContext } from '../types';
 import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from '../utils/constants';
 import sendMail from '../utils/sendMail';
 import { validateLogin, validateRegister } from '../validators/member';
-import { isAuth } from '../middleware/isAuth';
 
 @InputType()
 export class NewMemberInput {

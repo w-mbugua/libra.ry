@@ -6,7 +6,7 @@ export class TagFactory extends Factory<Tag> {
 
   definition(faker: Faker): Partial<Tag> {
     return {
-	  name: faker.word.noun({ strategy: 'shortest' })
+	  name: faker.helpers.unique(faker.word.noun)
     };
   }
 }

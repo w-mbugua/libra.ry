@@ -3,7 +3,6 @@ import {
   Property,
   PrimaryKey,
   ManyToOne,
-  OneToOne,
 } from '@mikro-orm/core';
 import { Field, ObjectType } from 'type-graphql';
 import { Member } from './Member';
