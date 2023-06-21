@@ -81,6 +81,8 @@ describe('Book Entity Functions', () => {
     const response = await request.post('/graphql').send({
       query: `mutation {
         addBook(newBookData: { title: "The Great Fire", author: "Shirley Hazard", tag: "love"}) {
+        message
+         book {
           id
           title
           status
@@ -91,17 +93,17 @@ describe('Book Entity Functions', () => {
             name
             id
           }
+         }
         }
       }
       `,
     });
     expect(response.status).toBe(200);
     expect(response.body.data).not.toBeNull();
-    expect(response.body.data.addBook.status).toBe('available');
-    expect(Object.values(response.body.data.addBook)).toContain(
-      'The Great Fire'
-    );
-  });
+    const book = response.body.data.addBook.book;
+    expect(book.status).toBe('available');
+    expect(Object.values(book)).toContain('The Great Fire');
+  }, 10000);
 
   it('should get a book by Id', async () => {
     const res = await request
@@ -130,22 +132,24 @@ describe('Book Entity Functions', () => {
   it('should update a book title', async () => {
     await seeder.seed(BookSeeder);
     const testBook = await em.findOneOrFail(Book, { id: 1 });
+    const { description, subtitle, id } = testBook;
+
     const response = await request.post('/graphql').send({
       query: `
       mutation {
-        updateBook(title: "${testBook.title}", newTitle: "The Pragmatic Programmer") {
+        updateBook(options: {description: "${description}", subtitle: "${subtitle}", id: ${id}, author: "Andy Hunt", title: "The Pragmatic Programmer"}) {
+          message
+        book {
           id
           title
-          author {
-            id
-            name
-          }
+        }
         }
       }
       `,
     });
+
     expect(response.status).toBe(200);
-    expect(response.body.data.updateBook.title).toBe(
+    expect(response.body.data.updateBook.book.title).toBe(
       'The Pragmatic Programmer'
     );
   });
@@ -159,8 +163,6 @@ describe('Book Entity Functions', () => {
       }
       `,
     });
-    console.log(res.body);
-
     expect(res.status).toBe(200);
     expect(res.body.data.deleteBook).toBe(204);
   });
@@ -213,8 +215,6 @@ describe('Book Entity Functions', () => {
       }
       `,
     });
-
-    console.log(response.error);
 
     expect(response.status).toBe(200);
     expect(response.body.data.reserve.message).toBe('reservation successful!');

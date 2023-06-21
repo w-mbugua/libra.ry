@@ -160,10 +160,9 @@ export class BookResolver {
       authorRef.name = options.author;
       await em.flush();
     }
+    book.title = options.title || book.title;
     book.subtitle = options.subtitle || book.subtitle;
     book.description = options.description || book.description;
-    console.log('HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', cover);
-
     if (cover) {
       console.log('COVER', cover);
       const { createReadStream } = cover;
