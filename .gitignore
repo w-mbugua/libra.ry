@@ -5,3 +5,4 @@ dist/
 dump.rdb
 coverage/
 todo.md
+deploy.sh

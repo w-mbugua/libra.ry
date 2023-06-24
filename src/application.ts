@@ -12,7 +12,7 @@ import Redis from 'ioredis';
 import config from './mikro-orm.config';
 import connectRedis from 'connect-redis';
 import session, { Session, SessionData } from 'express-session';
-import { COOKIE_NAME } from './utils/constants';
+import { COOKIE_NAME, ORIGINS, __prod__ } from './utils/constants';
 import { GraphQLSchema } from 'graphql';
 import { buildSchema } from 'type-graphql';
 import { WebSocketServer } from 'ws';
@@ -78,7 +78,8 @@ export default class Application {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
         httpOnly: true,
         sameSite: 'lax',
-        secure: false,
+        secure: __prod__,
+        domain: __prod__ ? process.env.DOMAIN : undefined,
       },
     });
 
@@ -88,10 +89,7 @@ export default class Application {
   public init = async (): Promise<void> => {
     this.corsOptions = {
       credentials: true,
-      origin: [
-        'https://sandbox.embed.apollographql.com',
-        'http://localhost:3005',
-      ],
+      origin: __prod__ ? process.env.CORS_ORIGIN : ORIGINS,
       // origin: process.env.CORS_ORIGIN,
     };
 
@@ -141,7 +139,7 @@ export default class Application {
     });
 
     await server.start();
-
+    this.app.set('trust proxy', 1);
     this.app.use(
       '/graphql',
       cors<cors.CorsRequest>(this.corsOptions),
